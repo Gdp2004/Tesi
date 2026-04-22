@@ -123,7 +123,9 @@ def pass4_content_fidelity(out_doc) -> list[str]:
     out_text_norm = re.sub(r"\s+", " ", out_text.replace("$", ""))
     # sample characteristic sentences that must survive
     touchstones = [
-        "Price dynamics in financial markets exhibit a complexity",
+        # Abstract is intentionally re-written to comply with MDPI's 200-word
+        # limit and structured-abstract template, so we do not look for the
+        # original sentence. We check every other body section instead.
         "The price of a financial instrument is the emergent outcome",
         "A price signal",
         "To move from a scaling description",
