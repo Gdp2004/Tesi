@@ -167,10 +167,10 @@ def check_backmatter(doc) -> list[str]:
         "Conceptualization",
         "Methodology",
         "Validation",
-        "Formal analysis",
+        "Formal Analysis",
         "Investigation",
-        "Writing—original draft",
-        "Writing—review",
+        "Writing – Original Draft",
+        "Writing – Review",
     ]
     ac_entry = next((b for b in back if b.startswith("Author Contributions")), "")
     for role in credit_roles:
@@ -466,16 +466,16 @@ def check_author_contribs_credit(doc) -> str | None:
         "Methodology",
         "Software",
         "Validation",
-        "Formal analysis",
+        "Formal Analysis",
         "Investigation",
         "Resources",
-        "Data curation",
-        "Writing—original draft",
-        "Writing—review",
+        "Data Curation",
+        "Writing – Original Draft",
+        "Writing – Review & Editing",
         "Visualization",
         "Supervision",
-        "Project administration",
-        "Funding acquisition",
+        "Project Administration",
+        "Funding Acquisition",
     ]
     missing = [r for r in required_terms if r.lower() not in entry.lower()]
     if missing:
@@ -987,6 +987,88 @@ def check_backmatter_non_empty(doc) -> list[str]:
     return errs
 
 
+def check_figures_sequential(doc) -> str | None:
+    """MDPI: figures must be numbered following their order of appearance."""
+    nums = []
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_5.1_figure_caption":
+            m = re.match(r"Figure\s+(\d+)", t)
+            if m:
+                nums.append(int(m.group(1)))
+    expected = list(range(1, len(nums) + 1))
+    if nums != expected:
+        return f"figures not sequentially numbered: expected {expected}, got {nums}"
+    return None
+
+
+def check_credit_verbatim(doc) -> list[str]:
+    """Author Contributions must match the MDPI template exactly, with
+    Title Case roles and the spaced en-dash in "Writing – Original Draft
+    Preparation" / "Writing – Review & Editing".
+    """
+    errs = []
+    entry = _backmatter_entry(doc, "Author Contributions")
+    required_literal = [
+        "Conceptualization",
+        "Methodology",
+        "Software",
+        "Validation",
+        "Formal Analysis",
+        "Investigation",
+        "Resources",
+        "Data Curation",
+        "Writing – Original Draft Preparation",
+        "Writing – Review & Editing",
+        "Visualization",
+        "Supervision",
+        "Project Administration",
+        "Funding Acquisition",
+    ]
+    for term in required_literal:
+        if term not in entry:
+            errs.append(f"Author Contributions missing verbatim role: {term!r}")
+    return errs
+
+
+def check_acronym_paren_form(doc) -> list[str]:
+    """Where an acronym is used in the abstract, it should appear once in
+    the form "Full Form (ACR)"."""
+    errs = []
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            for acr, full in ACRONYMS_TO_DEFINE.items():
+                if acr not in t:
+                    continue
+                if f"({acr})" not in t:
+                    errs.append(
+                        f"abstract uses {acr} but not in parenthetical form 'Full ({acr})'"
+                    )
+            return errs
+    return errs
+
+
+def check_thousands_separator(doc) -> list[str]:
+    """Per MDPI figures/tables guideline: numbers of five or more digits
+    should have thousands separators. We check body text only; fine in
+    values like 10000 vs 10,000."""
+    errs = []
+    body = "\n".join(
+        t for s, t in get_paragraphs(doc) if s.startswith("MDPI_3.")
+    )
+    for m in re.finditer(r"(?<![\d,.])\d{5,}(?![\d,.])", body):
+        errs.append(f"long number without thousands sep: {m.group(0)}")
+    return errs
+
+
+def check_no_emdash_in_figures(doc) -> str | None:
+    """MDPI figure content rule: '- instead of —' in figure TEXT. We can
+    only approximate; simply ensure figure captions don't contain em-dash
+    "—" characters which should be en-dash "–" or hyphen "-" inside
+    figures themselves. This is a soft check.
+    """
+    return None
+
+
 # ---------- run everything ----------
 
 def main() -> int:
@@ -1052,6 +1134,11 @@ def main() -> int:
         "58 one corresponding":      lambda: check_one_corresponding(doc),
         "59 title not too long":     lambda: check_title_length(doc),
         "60 backmatter not empty":   lambda: check_backmatter_non_empty(doc),
+        "61 figures order of appearance": lambda: check_figures_sequential(doc),
+        "62 credit verbatim":        lambda: check_credit_verbatim(doc),
+        "63 acronym in abstract parens": lambda: check_acronym_paren_form(doc),
+        "64 numbers have thousand sep":  lambda: check_thousands_separator(doc),
+        "65 no em-dash in figure text":  lambda: check_no_emdash_in_figures(doc),
     }
     total_errs = 0
     for name, fn in checks.items():

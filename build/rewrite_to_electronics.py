@@ -238,7 +238,7 @@ def add_figure(doc: Document, image_path: Path, caption: str):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run()
     run.add_picture(str(image_path), width=Cm(14))
-    cap = doc.add_paragraph(_strip_inline_maths(caption))
+    cap = doc.add_paragraph(renumber_figures(_strip_inline_maths(caption)))
     cap.style = doc.styles["MDPI_5.1_figure_caption"]
     return cap
 
@@ -294,7 +294,7 @@ def copy_source_table(doc: Document, src_table):
         pStyle.set(qn("w:val"), "Table Grid")
     for t_el in tbl_xml.iter(qn("w:t")):
         if t_el.text:
-            t_el.text = _strip_inline_maths(t_el.text)
+            t_el.text = renumber_figures(_strip_inline_maths(t_el.text))
 
 
 # ---------------------------------------------------------------------------
@@ -433,19 +433,47 @@ FIGURE_CITATION_INJECTIONS = {
 }
 
 
-# Ordered list of image files as they appear in the MRQF document
+# Ordered list of image files as they appear in the MRQF document. The source
+# manuscript numbers them inconsistently with document order; MDPI rule
+# (section "Preparing Figures, Schemes and Tables") requires figures to be
+# numbered following their order of appearance. We renumber both the caption
+# and every body-text reference using FIGURE_RENUMBER below.
 IMAGE_ORDER = [
-    "86dbf103603466e89edd3bb8f86d0ec50c76bfba.png",  # Figure 1
-    "9f69b37eab66096cea01f44f7ffe53df1b253963.png",  # Figure 2
-    "77d7691f31d0656d51a02e6ab2029d3f06ab9164.png",  # Figure 3
-    "04ad1bf59b0b7a48f944f24d8219df4080c18cd5.png",  # Figure 5
-    "63f6b8d4790b659471f2264181753247c162d360.png",  # Figure 4
-    "5f959ce10d672d7bd140eeedf1d0ac432b454c2b.png",  # Figure 7
-    "5c3b2910fa051cef9634a1af41ddbb39fbfc2e45.png",  # Figure 10
-    "0dde4cad5cf01590766ae782390fc23ab711029d.png",  # Figure 8
-    "d4fd55400f8fc85be9fd0bddc6b5af062d7e2196.png",  # Figure 9
-    "01ec5859f3b859a750561738bdbd2c9fb62107cf.png",  # Figure 6
+    "86dbf103603466e89edd3bb8f86d0ec50c76bfba.png",  # source Figure 1
+    "9f69b37eab66096cea01f44f7ffe53df1b253963.png",  # source Figure 2
+    "77d7691f31d0656d51a02e6ab2029d3f06ab9164.png",  # source Figure 3
+    "04ad1bf59b0b7a48f944f24d8219df4080c18cd5.png",  # source Figure 5
+    "63f6b8d4790b659471f2264181753247c162d360.png",  # source Figure 4
+    "5f959ce10d672d7bd140eeedf1d0ac432b454c2b.png",  # source Figure 7
+    "5c3b2910fa051cef9634a1af41ddbb39fbfc2e45.png",  # source Figure 10
+    "0dde4cad5cf01590766ae782390fc23ab711029d.png",  # source Figure 8
+    "d4fd55400f8fc85be9fd0bddc6b5af062d7e2196.png",  # source Figure 9
+    "01ec5859f3b859a750561738bdbd2c9fb62107cf.png",  # source Figure 6
 ]
+
+# old figure number -> new figure number (order-of-appearance)
+FIGURE_RENUMBER = {
+    1: 1, 2: 2, 3: 3,
+    4: 5,  # case-study figure appears after the pipeline figure
+    5: 4,  # pipeline figure appears first
+    6: 10,
+    7: 6,
+    8: 8,
+    9: 9,
+    10: 7,
+}
+
+
+_FIG_RE = re.compile(r"\bFigure\s+(\d+)")
+
+
+def renumber_figures(text: str) -> str:
+    if not text:
+        return text
+    return _FIG_RE.sub(
+        lambda m: f"Figure {FIGURE_RENUMBER.get(int(m.group(1)), int(m.group(1)))}",
+        text,
+    )
 
 # Paragraphs that make up Algorithm 1 (pseudocode) in the source
 ALG_START = 94
@@ -553,12 +581,13 @@ def rewrite() -> None:
             "MDPI_6.2_back_matter",
             "Author Contributions: Conceptualization, X.X. and Y.Y.; "
             "Methodology, X.X.; Software, X.X.; Validation, X.X., Y.Y. and "
-            "Z.Z.; Formal analysis, X.X.; Investigation, X.X.; Resources, "
-            "X.X.; Data curation, X.X.; Writing—original draft preparation, "
-            "X.X.; Writing—review and editing, X.X.; Visualization, X.X.; "
-            "Supervision, X.X.; Project administration, X.X.; Funding "
-            "acquisition, Y.Y. All authors have read and agreed to the "
-            "published version of the manuscript.",
+            "Z.Z.; Formal Analysis, X.X.; Investigation, X.X.; Resources, "
+            "X.X.; Data Curation, X.X.; Writing – Original Draft "
+            "Preparation, X.X.; Writing – Review & Editing, X.X.; "
+            "Visualization, X.X.; Supervision, X.X.; Project "
+            "Administration, X.X.; Funding Acquisition, Y.Y. All authors "
+            "have read and agreed to the published version of the "
+            "manuscript.",
         )
         add_para(
             doc,
@@ -761,6 +790,7 @@ def rewrite() -> None:
             if needle in body_text:
                 body_text = body_text.replace(needle, expansion, 1)
                 acronyms_expanded.add(needle)
+        body_text = renumber_figures(body_text)
         add_inline_math_para(doc, "MDPI_3.1_text", body_text)
         i += 1
 
