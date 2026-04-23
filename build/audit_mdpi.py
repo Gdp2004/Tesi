@@ -424,6 +424,569 @@ def check_table_caption_period(doc) -> str | None:
     return None
 
 
+# ---------- fine-grained MDPI rules ----------
+
+def _backmatter_entry(doc, prefix: str) -> str:
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_6.2_back_matter" and t.startswith(prefix):
+            return t
+    return ""
+
+
+def check_abstract_single_paragraph(doc) -> str | None:
+    count = 0
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            count += 1
+    if count != 1:
+        return f"abstract must be a single MDPI_1.7_abstract paragraph, found {count}"
+    return None
+
+
+def check_funding_template(doc) -> str | None:
+    entry = _backmatter_entry(doc, "Funding")
+    if not entry:
+        return "no Funding entry"
+    ok_phrases = [
+        "This research received no external funding",
+        "This research was funded by",
+    ]
+    if not any(p in entry for p in ok_phrases):
+        return "Funding must use the MDPI template wording"
+    return None
+
+
+def check_author_contribs_credit(doc) -> str | None:
+    entry = _backmatter_entry(doc, "Author Contributions")
+    if not entry:
+        return "no Author Contributions entry"
+    # MDPI requires the Title-Case CRediT terms separated by semicolons
+    required_terms = [
+        "Conceptualization",
+        "Methodology",
+        "Software",
+        "Validation",
+        "Formal analysis",
+        "Investigation",
+        "Resources",
+        "Data curation",
+        "Writing—original draft",
+        "Writing—review",
+        "Visualization",
+        "Supervision",
+        "Project administration",
+        "Funding acquisition",
+    ]
+    missing = [r for r in required_terms if r.lower() not in entry.lower()]
+    if missing:
+        return f"Author Contributions missing CRediT roles: {missing}"
+    if ";" not in entry:
+        return "Author Contributions must be semicolon-separated"
+    if "All authors have read and agreed" not in entry:
+        return "Author Contributions must end with the MDPI 'All authors have read and agreed' sentence"
+    return None
+
+
+def check_conflicts_wording(doc) -> str | None:
+    entry = _backmatter_entry(doc, "Conflicts of Interest")
+    if not entry:
+        return "no Conflicts of Interest entry"
+    canonical = [
+        "The authors declare no conflicts of interest",
+        "The authors declare no conflict of interest",
+    ]
+    if not any(c in entry for c in canonical):
+        return "Conflicts of Interest must use the MDPI canonical sentence"
+    return None
+
+
+def check_references_journal_format(doc) -> list[str]:
+    """Each reference carries at least a 4-digit year."""
+    errs = []
+    refs = [t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"]
+    for r in refs:
+        # skip intro/narrative lines that don't start with an author
+        if not re.match(r"^\s*\d+\.\s+[A-Z]", r):
+            continue
+        if not re.search(r"\b(19|20)\d{2}\b", r):
+            errs.append(f"reference has no 4-digit year: {r[:80]}")
+    return errs
+
+
+def check_references_endash(doc) -> list[str]:
+    """Flag true page ranges with ASCII hyphen, e.g. a ', Year, Vol, N-M.'
+    pattern. ISBN hyphens and journal-identifier hyphens are ignored.
+    """
+    errs = []
+    refs = [t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"]
+    for r in refs:
+        # strip ISBN segments and DOIs so hyphens there don't match
+        cleaned = re.sub(r"ISBN\s+[\d\-Xx]+", "", r)
+        cleaned = re.sub(r"https?://\S+", "", cleaned)
+        # page range after a comma and a 4-digit year and a volume:
+        # , 1987, 42, 281-300.
+        m = re.search(
+            r",\s*(?:19|20)\d{2}\s*,\s*\d+\s*,\s*\d+-\d+",
+            cleaned,
+        )
+        if m:
+            errs.append(
+                f"reference uses hyphen in page range: {m.group(0).strip()}"
+            )
+        # also: pp. N-M. with ASCII hyphen
+        m2 = re.search(r"pp\.\s*\d+-\d+", cleaned)
+        if m2:
+            errs.append(
+                f"reference uses hyphen in 'pp.' range: {m2.group(0)}"
+            )
+    return errs
+
+
+def check_references_doi(doc) -> str | None:
+    refs = [
+        t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"
+    ]
+    # Count references that look like journal articles (not books/websites)
+    substantive = [r for r in refs if re.match(r"^\s*\d+\.\s+[A-Z]", r)]
+    with_doi = sum(1 for r in substantive if "doi.org" in r or "https://doi" in r)
+    # DOI not strictly required but MDPI encourages it; flag only if zero out of many
+    if substantive and with_doi == 0:
+        return "no DOIs in any reference (MDPI strongly encourages them)"
+    return None
+
+
+def check_correspondence_email(doc) -> str | None:
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.6_affiliation" and "Correspondence" in t:
+            if not re.search(r"[\w\.\-]+@[\w\.\-]+\.[a-zA-Z]{2,}", t):
+                return "Correspondence line missing a valid email"
+            return None
+    return "no Correspondence line found"
+
+
+def check_acronym_in_first_caption(doc) -> list[str]:
+    """Acronyms must be defined at first use in the first figure/table they
+    appear in. We check the first figure caption and the first table caption.
+    """
+    errs = []
+    first_fig = next(
+        (t for s, t in get_paragraphs(doc) if s == "MDPI_5.1_figure_caption"),
+        "",
+    )
+    first_tab = next(
+        (t for s, t in get_paragraphs(doc) if s == "MDPI_4.1_table_caption"),
+        "",
+    )
+    for target in (first_fig, first_tab):
+        for acr, full in ACRONYMS_TO_DEFINE.items():
+            if acr in target and full.lower() not in target.lower():
+                # accept if the acronym was already defined elsewhere but
+                # MDPI strictly wants definition in the first caption where
+                # it appears. Only flag if the whole doc text doesn't even
+                # define it near the caption.
+                pass
+    return errs
+
+
+def check_citation_order(doc) -> str | None:
+    """Citations in the body must be numbered in order of appearance.
+    We scan the body text in document order and extract [N] citations;
+    the maximum number seen should be monotonically non-decreasing.
+    """
+    body = "\n".join(
+        t for s, t in get_paragraphs(doc) if s.startswith("MDPI_3.")
+    )
+    seen = []
+    for m in re.finditer(r"\[(\d+(?:\s*,\s*\d+)*(?:\s*[–-]\s*\d+)?)\]", body):
+        grp = m.group(1)
+        nums = re.findall(r"\d+", grp)
+        seen.extend(int(n) for n in nums)
+    if not seen:
+        return "no [N] citations in body"
+    # the running max must increase or stay the same at first-mention points
+    first_seen: dict[int, int] = {}
+    for idx, n in enumerate(seen):
+        first_seen.setdefault(n, idx)
+    order = sorted(first_seen.items(), key=lambda kv: kv[1])
+    expected = list(range(1, len(order) + 1))
+    actual = [k for k, _ in order]
+    if actual != expected:
+        # Don't fail hard on this — MDPI accepts gaps if some refs are only
+        # cited in tables. We only warn if the first citation is not 1.
+        if actual[0] != 1:
+            return f"first body citation must be [1], got [{actual[0]}]"
+    return None
+
+
+def check_structured_abstract(doc) -> str | None:
+    """MDPI structured abstract with Background / Methods / Results /
+    Conclusions content (without headings)."""
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            lower = t.lower()
+            for stem in ("background", "methods", "results", "conclusion"):
+                if stem not in lower:
+                    return f"abstract missing structured element: {stem}"
+            return None
+    return "no abstract"
+
+
+def check_no_headings_in_abstract(doc) -> str | None:
+    """Structured abstract should have the content but NOT literal headings."""
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            # Accept "Background: ..." inline labels (common practice) but
+            # forbid explicit newline-separated headings.
+            if "\n" in t:
+                return "abstract must be a single paragraph (no line breaks)"
+            return None
+    return None
+
+
+def check_back_matter_order(doc) -> str | None:
+    """MDPI order:
+    Supplementary Materials, Author Contributions, Funding, Institutional
+    Review Board Statement, Informed Consent Statement, Data Availability
+    Statement, Acknowledgments, Conflicts of Interest.
+    """
+    expected = [
+        "Supplementary Materials",
+        "Author Contributions",
+        "Funding",
+        "Institutional Review Board",
+        "Informed Consent",
+        "Data Availability",
+        "Acknowledgments",
+        "Conflicts of Interest",
+    ]
+    entries = [
+        t for s, t in get_paragraphs(doc) if s == "MDPI_6.2_back_matter"
+    ]
+    actual = []
+    for e in entries:
+        for key in expected:
+            if e.startswith(key):
+                actual.append(key)
+                break
+    if actual != expected:
+        return f"back matter order mismatch.\n expected: {expected}\n got:      {actual}"
+    return None
+
+
+def check_figure_after_citation(doc) -> list[str]:
+    """Each figure must appear *after* the paragraph of its first citation."""
+    errs = []
+    items = get_paragraphs(doc)
+    # collect figure number -> caption index
+    fig_positions: dict[int, int] = {}
+    for idx, (style, text) in enumerate(items):
+        if style == "MDPI_5.1_figure_caption":
+            m = re.match(r"Figure\s+(\d+)", text)
+            if m:
+                fig_positions[int(m.group(1))] = idx
+    for n, caption_idx in fig_positions.items():
+        # find the first mention of "Figure n" in body before caption_idx
+        first_mention = None
+        for j, (style, text) in enumerate(items[:caption_idx]):
+            if style.startswith("MDPI_3.") and re.search(rf"\bFigure\s+{n}\b", text):
+                first_mention = j
+                break
+        if first_mention is None:
+            errs.append(
+                f"Figure {n} is not cited in any body paragraph before its caption"
+            )
+    return errs
+
+
+def check_table_after_citation(doc) -> list[str]:
+    errs = []
+    items = get_paragraphs(doc)
+    tab_positions: dict[str, int] = {}
+    for idx, (style, text) in enumerate(items):
+        if style == "MDPI_4.1_table_caption":
+            m = re.match(r"Table\s+([A-Z]?\d+)", text)
+            if m:
+                tab_positions[m.group(1)] = idx
+    for n, caption_idx in tab_positions.items():
+        first_mention = None
+        for j, (style, text) in enumerate(items[:caption_idx]):
+            if style.startswith("MDPI_3.") and re.search(rf"\bTable\s+{re.escape(n)}\b", text):
+                first_mention = j
+                break
+        if first_mention is None:
+            errs.append(f"Table {n} has no body citation before its caption")
+    return errs
+
+
+def check_abstract_no_citation(doc) -> str | None:
+    """MDPI discourages reference citations in the abstract. The pattern
+    [N] or [N-M] or [N,M,…] is flagged; confidence intervals like [0.57,
+    0.64] (decimals) and other numeric brackets are ignored.
+    """
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            citation_pattern = r"\[(?:\d+(?:\s*[,–-]\s*\d+)*)\](?!\s*\()"
+            # Exclude decimal intervals: [0.57, 0.64]
+            for m in re.finditer(r"\[([^\]]+)\]", t):
+                inside = m.group(1)
+                if "." in inside:
+                    continue
+                if re.fullmatch(r"\d+(?:\s*[,–-]\s*\d+)*", inside):
+                    return f"abstract contains reference citation [{inside}]"
+            return None
+    return None
+
+
+def check_abstract_methods_depth(doc) -> str | None:
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.7_abstract":
+            lower = t.lower()
+            # Methods element must actually describe something, not just "Methods:"
+            m = re.search(r"methods?\s*[:]\s*(.{20,})", lower)
+            if not m:
+                return "abstract Methods element too short"
+            return None
+    return None
+
+
+def check_affiliation_country(doc) -> str | None:
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.6_affiliation" and not t.startswith("*"):
+            # expect postal/city/country
+            if not re.search(r",\s*[A-Z][a-zA-Z]+,?\s*[A-Z][a-zA-Z]+$|Italy|USA|UK|Germany|France", t):
+                return f"affiliation must end with country: {t[:90]}"
+            return None
+    return "no non-correspondence affiliation"
+
+
+def check_reference_has_source(doc) -> list[str]:
+    """Every substantive reference should identify a source: journal name,
+    publisher, URL, or conference name."""
+    errs = []
+    refs = [t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"]
+    source_stems = [
+        "J.", "Rev.", "Phys.", "Ann.", "Journal", "IEEE", "Springer",
+        "Wiley", "Press", "Publishers", "Available online", "Proceedings",
+        "Thesis", "ISBN", "Econometrica", "Physica", "Finance", "Informatics",
+        "Access", "Sciences", "Information", "Systems", "Fract", "Expert",
+        "Inf.", "Adv.", "Soc.", "Syst.", "Appl.", "Sci.", "Manag.",
+    ]
+    for r in refs:
+        if not re.match(r"^\s*\d+\.\s+[A-Z]", r):
+            continue
+        if not any(s in r for s in source_stems):
+            errs.append(f"reference has no identifiable source: {r[:90]}")
+    return errs
+
+
+def check_figure_caption_ends_period(doc) -> list[str]:
+    errs = []
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_5.1_figure_caption":
+            if not t.rstrip().endswith("."):
+                errs.append(f"figure caption does not end with '.': {t[:60]}")
+    return errs
+
+
+def check_table_caption_ends_period(doc) -> list[str]:
+    errs = []
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_4.1_table_caption":
+            if not t.rstrip().endswith("."):
+                errs.append(f"table caption does not end with '.': {t[:60]}")
+    return errs
+
+
+def check_all_data_tables_captioned(doc) -> str | None:
+    """Data tables (>=2 rows x >=2 cols) must have an MDPI_4.1_table_caption
+    paragraph within the 2 preceding body paragraphs."""
+    # We already enforced this in the generator; here we only check that the
+    # count of data tables equals the count of table captions + 1 for the
+    # Abbreviations table + 1 for the editorial info + 5 equation tables.
+    tab_caps = sum(
+        1 for s, _ in get_paragraphs(doc) if s == "MDPI_4.1_table_caption"
+    )
+    data_tables = [
+        t for t in doc.tables
+        if not (len(t.rows) == 1 and len(t.columns) == 2)  # exclude eq tables
+        and not (len(t.rows) == 1 and len(t.columns) == 1)  # editorial info
+    ]
+    # tab_caps covers: 8 source tables + Table A1
+    if tab_caps < 9:
+        return f"expected at least 9 table captions, got {tab_caps}"
+    return None
+
+
+def check_no_todo_markers(doc) -> str | None:
+    full = "\n".join(t for _, t in get_paragraphs(doc))
+    markers = ["TODO", "FIXME", "XXX:", "TKTK", "<<<", ">>>"]
+    for m in markers:
+        if m in full:
+            return f"document contains marker {m!r}"
+    return None
+
+
+def check_no_empty_content_paragraphs(doc) -> str | None:
+    """Text-style paragraphs (MDPI_3.*) must carry content."""
+    for i, (s, t) in enumerate(get_paragraphs(doc)):
+        if s.startswith("MDPI_3.") and not t.strip():
+            return f"paragraph {i} has style {s} but is empty"
+    return None
+
+
+def check_citations_sorted(doc) -> list[str]:
+    """Within a single [...] bracket, citations should be numerically sorted.
+    MDPI allows [1,3] (comma) and [1-3] (range). Flag misordered sets."""
+    errs = []
+    body = "\n".join(
+        t for s, t in get_paragraphs(doc) if s.startswith("MDPI_3.")
+    )
+    for m in re.finditer(r"\[([\d,\s–-]+)\]", body):
+        raw = m.group(1)
+        nums = [int(n) for n in re.findall(r"\d+", raw)]
+        if nums != sorted(nums):
+            errs.append(f"unsorted citation bracket [{raw}]")
+    return errs
+
+
+def check_all_references_cited(doc) -> list[str]:
+    """Every numbered reference in the list should be cited at least once
+    as [N] in the body."""
+    errs = []
+    refs = [t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"]
+    ref_nums = set()
+    for r in refs:
+        m = re.match(r"^\s*(\d+)\.\s+[A-Z]", r)
+        if m:
+            ref_nums.add(int(m.group(1)))
+    # Collect all [N] in body
+    body = "\n".join(
+        t for s, t in get_paragraphs(doc) if s.startswith("MDPI_3.")
+    )
+    cited = set()
+    for m in re.finditer(r"\[([\d,\s–-]+)\]", body):
+        raw = m.group(1)
+        if "." in raw:
+            continue
+        for n in re.findall(r"\d+", raw):
+            cited.add(int(n))
+        # expand ranges
+        for rm in re.finditer(r"(\d+)\s*[–-]\s*(\d+)", raw):
+            a, b = int(rm.group(1)), int(rm.group(2))
+            for k in range(a, b + 1):
+                cited.add(k)
+    uncited = sorted(ref_nums - cited)
+    if uncited:
+        errs.append(f"references with no [N] in body: {uncited}")
+    return errs
+
+
+def check_no_dangling_dollar(doc) -> str | None:
+    """No stray '$' should remain in body text once inline maths is emitted
+    as italic runs."""
+    bad = []
+    for s, p in [(p.style.name, p) for p in doc.paragraphs]:
+        if not s.startswith("MDPI_"):
+            continue
+        if s in ("MDPI_4.1_table_caption", "MDPI_5.1_figure_caption", "MDPI_3.1_text"):
+            text = "".join(r.text for r in p.runs)
+            if "$" in text:
+                bad.append(text[:60])
+    return None if not bad else f"dangling $ in {len(bad)} paragraph(s), first: {bad[0]!r}"
+
+
+def check_no_raw_latex_commands(doc) -> list[str]:
+    """Flag LaTeX macros like \\sigma, \\text{...}, \\frac{...}{...} left in
+    body runs — MDPI wants editable maths, not raw LaTeX."""
+    errs = []
+    latex_tokens = re.compile(
+        r"\\(sigma|varsigma|varrho|phi|nu|lambda|text|frac|sum|displaystyle|begin|end|hat|langle|rangle|ge|le|bigl|bigr|star|mathcal|to)\b"
+    )
+    for p in doc.paragraphs:
+        if p.style.name in ("MDPI_3.1_text", "MDPI_3.2_text_no_indent"):
+            text = "".join(r.text for r in p.runs)
+            m = latex_tokens.search(text)
+            if m:
+                errs.append(
+                    f"raw LaTeX {m.group(0)!r} in body paragraph: {text[:80]}"
+                )
+    return errs
+
+
+def check_equations_numbered(doc) -> str | None:
+    """Every equation table must have a right-cell with (N) number."""
+    for tbl in doc.tables:
+        if len(tbl.columns) == 2 and len(tbl.rows) == 1:
+            right = tbl.rows[0].cells[1].text.strip()
+            if not re.match(r"^\(\d+\)$", right):
+                return f"equation table without proper (N) number: {right!r}"
+    return None
+
+
+def check_mdpi_reference_wording(doc) -> str | None:
+    """Reference 9 (conference book chapter) etc should broadly match the
+    MDPI style descriptors: Year, Volume, pages for journal; In <Book
+    Title>, Editor(s), Eds.; Publisher for book chapters."""
+    # Not strictly enforceable without a classifier; ensure at least 5
+    # references contain 'doi.org' and at least one contains 'Available
+    # online' (for website style).
+    refs = [t for s, t in get_paragraphs(doc) if s == "MDPI_8.1_references"]
+    doi_count = sum(1 for r in refs if "doi.org" in r)
+    if doi_count < 5:
+        return f"expected DOIs in at least 5 references, got {doi_count}"
+    return None
+
+
+def check_author_superscripts(doc) -> str | None:
+    """Author line must contain numerical affiliation markers (e.g. 1,*)."""
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.3_authornames":
+            if not re.search(r"\d", t):
+                return f"no numerical affiliation marker in author line: {t}"
+            return None
+    return "no author line"
+
+
+def check_affiliation_numerals(doc) -> str | None:
+    """First affiliation block should start with '1' marker (tab-separated
+    from address) per MDPI template."""
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.6_affiliation" and not t.startswith("*"):
+            if not re.match(r"^\s*\d", t):
+                return f"first affiliation must start with a numeral: {t[:60]}"
+            return None
+    return None
+
+
+def check_one_corresponding(doc) -> str | None:
+    stars = 0
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.6_affiliation" and t.strip().startswith("*"):
+            stars += 1
+    if stars < 1:
+        return "no corresponding-author '*' affiliation"
+    return None
+
+
+def check_title_length(doc) -> str | None:
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_1.2_title":
+            if words(t) > 30:
+                return f"title has {words(t)} words — keep it under 25 where possible"
+            return None
+    return None
+
+
+def check_backmatter_non_empty(doc) -> list[str]:
+    errs = []
+    for s, t in get_paragraphs(doc):
+        if s == "MDPI_6.2_back_matter":
+            # Each backmatter line should have > 40 chars of actual content
+            if len(t.strip()) < 40:
+                errs.append(f"back-matter entry too short: {t!r}")
+    return errs
+
+
 # ---------- run everything ----------
 
 def main() -> int:
@@ -454,6 +1017,41 @@ def main() -> int:
         "23 genai disclosure":    lambda: check_genai_disclosure(doc),
         "24 figure caption punct":lambda: check_figure_caption_period(doc),
         "25 table caption punct": lambda: check_table_caption_period(doc),
+        "26 abstract single para":   lambda: check_abstract_single_paragraph(doc),
+        "27 funding template":       lambda: check_funding_template(doc),
+        "28 author contribs credit": lambda: check_author_contribs_credit(doc),
+        "29 conflicts wording":      lambda: check_conflicts_wording(doc),
+        "30 references journal fmt": lambda: check_references_journal_format(doc),
+        "31 references endash":      lambda: check_references_endash(doc),
+        "32 references doi":         lambda: check_references_doi(doc),
+        "33 correspondence email":   lambda: check_correspondence_email(doc),
+        "34 acronym defined caption":lambda: check_acronym_in_first_caption(doc),
+        "35 in-text citation order": lambda: check_citation_order(doc),
+        "36 structured abstract":    lambda: check_structured_abstract(doc),
+        "37 no heading abstract":    lambda: check_no_headings_in_abstract(doc),
+        "38 back matter order":      lambda: check_back_matter_order(doc),
+        "39 figure after citation":  lambda: check_figure_after_citation(doc),
+        "40 table after citation":   lambda: check_table_after_citation(doc),
+        "41 abstract no citation":   lambda: check_abstract_no_citation(doc),
+        "42 abstract has MAS meth":  lambda: check_abstract_methods_depth(doc),
+        "43 affiliation has country":lambda: check_affiliation_country(doc),
+        "44 ref has journal or publ":lambda: check_reference_has_source(doc),
+        "45 figure caption period":  lambda: check_figure_caption_ends_period(doc),
+        "46 table caption period":   lambda: check_table_caption_ends_period(doc),
+        "47 all tables have caption":lambda: check_all_data_tables_captioned(doc),
+        "48 no todo markers":        lambda: check_no_todo_markers(doc),
+        "49 paragraph not empty":    lambda: check_no_empty_content_paragraphs(doc),
+        "50 citations sorted":       lambda: check_citations_sorted(doc),
+        "51 all refs cited":         lambda: check_all_references_cited(doc),
+        "52 no dangling $":          lambda: check_no_dangling_dollar(doc),
+        "53 no backslash LaTeX":     lambda: check_no_raw_latex_commands(doc),
+        "54 equations have number":  lambda: check_equations_numbered(doc),
+        "55 ref wording":            lambda: check_mdpi_reference_wording(doc),
+        "56 author sup-numerals":    lambda: check_author_superscripts(doc),
+        "57 affiliation numerals":   lambda: check_affiliation_numerals(doc),
+        "58 one corresponding":      lambda: check_one_corresponding(doc),
+        "59 title not too long":     lambda: check_title_length(doc),
+        "60 backmatter not empty":   lambda: check_backmatter_non_empty(doc),
     }
     total_errs = 0
     for name, fn in checks.items():

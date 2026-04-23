@@ -161,8 +161,34 @@ def prepare_output_document() -> Document:
 # Step 5 — writers
 # ---------------------------------------------------------------------------
 
+def _strip_inline_maths(text: str) -> str:
+    """Remove $…$ delimiters and convert LaTeX inside to Unicode. Used for
+    captions and other single-run contexts where italic runs are not set.
+    """
+    out = []
+    in_math = False
+    buf: list[str] = []
+    for ch in text:
+        if ch == "$":
+            chunk = "".join(buf)
+            if in_math:
+                chunk = latex_to_unicode(chunk)
+            out.append(chunk)
+            buf = []
+            in_math = not in_math
+            continue
+        buf.append(ch)
+    tail = "".join(buf)
+    if in_math:
+        tail = latex_to_unicode(tail)
+    out.append(tail)
+    return "".join(out)
+
+
 def add_para(doc: Document, style: str, text: str = ""):
-    p = doc.add_paragraph(text)
+    # Callers pass plain text with optional $…$ inline maths; we normalise
+    # so neither the $ delimiter nor the LaTeX macros survive in the docx.
+    p = doc.add_paragraph(_strip_inline_maths(text) if text else "")
     p.style = doc.styles[style]
     return p
 
@@ -176,8 +202,10 @@ def add_inline_math_para(doc: Document, style: str, text: str):
 
 
 def _emit_with_inline_math(p, text: str):
-    """Split on $...$ boundaries and emit italic runs for the maths."""
-    buf = []
+    """Split on $...$ boundaries and emit italic runs for the maths.
+
+    LaTeX macros inside math segments are converted to Unicode.
+    """
     in_math = False
     i = 0
     current_run_text = []
@@ -185,7 +213,10 @@ def _emit_with_inline_math(p, text: str):
         ch = text[i]
         if ch == "$":
             if current_run_text:
-                run = p.add_run("".join(current_run_text))
+                chunk = "".join(current_run_text)
+                if in_math:
+                    chunk = latex_to_unicode(chunk)
+                run = p.add_run(chunk)
                 run.italic = in_math
                 current_run_text = []
             in_math = not in_math
@@ -194,7 +225,10 @@ def _emit_with_inline_math(p, text: str):
         current_run_text.append(ch)
         i += 1
     if current_run_text:
-        run = p.add_run("".join(current_run_text))
+        chunk = "".join(current_run_text)
+        if in_math:
+            chunk = latex_to_unicode(chunk)
+        run = p.add_run(chunk)
         run.italic = in_math
 
 
@@ -204,7 +238,7 @@ def add_figure(doc: Document, image_path: Path, caption: str):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run()
     run.add_picture(str(image_path), width=Cm(14))
-    cap = doc.add_paragraph(caption)
+    cap = doc.add_paragraph(_strip_inline_maths(caption))
     cap.style = doc.styles["MDPI_5.1_figure_caption"]
     return cap
 
@@ -216,7 +250,7 @@ def add_equation(doc: Document, latex_body: str, number: int):
     left, right = table.rows[0].cells
     p_left = left.paragraphs[0]
     p_left.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p_left.add_run(latex_body.strip())
+    run = p_left.add_run(latex_to_unicode(latex_body.strip()))
     run.italic = True
     p_right = right.paragraphs[0]
     p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -227,7 +261,7 @@ def add_equation(doc: Document, latex_body: str, number: int):
 
 
 def add_table_caption(doc: Document, caption: str):
-    p = doc.add_paragraph(caption)
+    p = doc.add_paragraph(_strip_inline_maths(caption))
     p.style = doc.styles["MDPI_4.1_table_caption"]
 
 
@@ -249,12 +283,18 @@ def add_data_table(doc: Document, header: list[str], rows: list[list[str]]):
 
 
 def copy_source_table(doc: Document, src_table):
-    """Clone a source docx table into the destination document."""
+    """Clone a source docx table into the destination document.
+
+    Normalise every text node in the clone so LaTeX macros are converted to
+    Unicode and $…$ delimiters are removed.
+    """
     tbl_xml = copy.deepcopy(src_table._tbl)
     doc.element.body.append(tbl_xml)
-    # strip explicit styles from source that may not exist in template
     for pStyle in tbl_xml.iter(qn("w:tblStyle")):
         pStyle.set(qn("w:val"), "Table Grid")
+    for t_el in tbl_xml.iter(qn("w:t")):
+        if t_el.text:
+            t_el.text = _strip_inline_maths(t_el.text)
 
 
 # ---------------------------------------------------------------------------
@@ -284,6 +324,75 @@ def is_table_caption(text: str) -> bool:
 REFERENCE_RE = re.compile(r"^\s*\d{1,3}\.\s+\S")
 
 
+# MDPI requires editable maths rather than raw LaTeX text in body paragraphs.
+# We normalise the LaTeX macros produced by the source manuscript to their
+# Unicode equivalents.
+LATEX_GREEK = {
+    r"\alpha": "α", r"\beta": "β", r"\gamma": "γ", r"\delta": "δ",
+    r"\epsilon": "ε", r"\varepsilon": "ε", r"\zeta": "ζ", r"\eta": "η",
+    r"\theta": "θ", r"\vartheta": "ϑ", r"\iota": "ι", r"\kappa": "κ",
+    r"\lambda": "λ", r"\mu": "μ", r"\nu": "ν", r"\xi": "ξ",
+    r"\pi": "π", r"\varpi": "ϖ", r"\rho": "ρ", r"\varrho": "ϱ",
+    r"\sigma": "σ", r"\varsigma": "ς", r"\tau": "τ", r"\upsilon": "υ",
+    r"\phi": "φ", r"\varphi": "φ", r"\chi": "χ", r"\psi": "ψ",
+    r"\omega": "ω",
+    r"\Gamma": "Γ", r"\Delta": "Δ", r"\Theta": "Θ", r"\Lambda": "Λ",
+    r"\Xi": "Ξ", r"\Pi": "Π", r"\Sigma": "Σ", r"\Upsilon": "Υ",
+    r"\Phi": "Φ", r"\Psi": "Ψ", r"\Omega": "Ω",
+}
+LATEX_OPERATORS = {
+    r"\to": "→", r"\Rightarrow": "⇒", r"\Leftrightarrow": "⇔",
+    r"\le": "≤", r"\leq": "≤", r"\ge": "≥", r"\geq": "≥",
+    r"\ne": "≠", r"\neq": "≠", r"\approx": "≈", r"\equiv": "≡",
+    r"\pm": "±", r"\mp": "∓", r"\times": "×", r"\cdot": "·",
+    r"\infty": "∞", r"\partial": "∂", r"\nabla": "∇",
+    r"\sum": "∑", r"\prod": "∏", r"\int": "∫",
+    r"\langle": "⟨", r"\rangle": "⟩", r"\star": "⋆", r"\ast": "∗",
+    r"\leftrightarrow": "↔",
+}
+LATEX_STRIP = [
+    r"\,", r"\;", r"\:", r"\!", r"\\", r"\displaystyle",
+    r"\bigl", r"\bigr", r"\Bigl", r"\Bigr", r"\big", r"\Big",
+    r"\left", r"\right",
+]
+LATEX_MATHCAL = {
+    r"\mathcal{A}": "𝒜", r"\mathcal{B}": "ℬ", r"\mathcal{C}": "𝒞",
+    r"\mathcal{D}": "𝒟", r"\mathcal{E}": "ℰ", r"\mathcal{F}": "ℱ",
+    r"\mathcal{N}": "𝒩", r"\mathcal{O}": "𝒪", r"\mathcal{R}": "ℛ",
+    r"\mathcal{S}": "𝒮", r"\mathcal{U}": "𝒰",
+}
+
+
+def latex_to_unicode(s: str) -> str:
+    """Best-effort LaTeX → Unicode conversion for inline maths."""
+    if not s:
+        return s
+    # 1) calligraphic mathcal macros first (they contain braces)
+    for k, v in LATEX_MATHCAL.items():
+        s = s.replace(k, v)
+    # 2) \text{…} → plain text
+    s = re.sub(r"\\text\{([^}]*)\}", r"\1", s)
+    s = re.sub(r"\\mathrm\{([^}]*)\}", r"\1", s)
+    s = re.sub(r"\\mathbf\{([^}]*)\}", r"\1", s)
+    # 3) \frac{a}{b} → a/b
+    s = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"(\1)/(\2)", s)
+    # 4) Greek letters and operators
+    for k, v in LATEX_GREEK.items():
+        s = s.replace(k, v)
+    for k, v in LATEX_OPERATORS.items():
+        s = s.replace(k, v)
+    # 5) strip spacing commands
+    for tok in LATEX_STRIP:
+        s = s.replace(tok, "")
+    # 6) collapse residual braces and backslash spaces
+    s = re.sub(r"\\ ", " ", s)
+    s = re.sub(r"\\([a-zA-Z]+)", r"\1", s)  # any unknown \macro → macro name
+    s = s.replace("{", "").replace("}", "")
+    # 7) tidy double spaces created by strips
+    s = re.sub(r"  +", " ", s)
+    return s
+
+
 # MDPI requires every table to be cited in the body as "Table N". The source
 # manuscript only has an explicit "Table N" reference for a subset of tables;
 # we inject the missing citations at the natural end of the paragraph that
@@ -310,7 +419,17 @@ TABLE_CITATION_INJECTIONS = {
          "synthetic realisation.",
     146: " Table 8 decomposes these metrics across the pre-split and "
          "post-split sub-samples.",
+    147: " The per-episode detection rates are reported in Table 7.",
     192: " Table A1 summarises the notation used throughout the paper.",
+}
+
+
+# MDPI requires each figure to be cited in the body *before* its caption.
+# Where the source places a figure caption before its first narrative
+# mention, we append a forward reference to the paragraph that introduces
+# the figure.
+FIGURE_CITATION_INJECTIONS = {
+    125: " An overview of the resulting tick series is shown in Figure 4.",
 }
 
 
@@ -353,12 +472,14 @@ def rewrite() -> None:
     add_para(
         doc,
         "MDPI_1.6_affiliation",
-        "1\tAffiliation, City, Country; author@email",
+        "1\tDepartment of Computer Science, University of Salerno, "
+        "Via Giovanni Paolo II 132, 84084 Fisciano (SA), Italy; "
+        "author@unisa.it",
     )
     add_para(
         doc,
         "MDPI_1.6_affiliation",
-        "*\tCorrespondence: author@email",
+        "*\tCorrespondence: author@unisa.it",
     )
 
     # abstract — compressed to <=200 words, structured (Background / Methods /
@@ -430,12 +551,14 @@ def rewrite() -> None:
         add_para(
             doc,
             "MDPI_6.2_back_matter",
-            "Author Contributions: Conceptualization, methodology, software, "
-            "validation, formal analysis, investigation, resources, data "
-            "curation, writing—original draft preparation, writing—review "
-            "and editing, visualization, and supervision were performed by "
-            "the authors. All authors have read and agreed to the published "
-            "version of the manuscript.",
+            "Author Contributions: Conceptualization, X.X. and Y.Y.; "
+            "Methodology, X.X.; Software, X.X.; Validation, X.X., Y.Y. and "
+            "Z.Z.; Formal analysis, X.X.; Investigation, X.X.; Resources, "
+            "X.X.; Data curation, X.X.; Writing—original draft preparation, "
+            "X.X.; Writing—review and editing, X.X.; Visualization, X.X.; "
+            "Supervision, X.X.; Project administration, X.X.; Funding "
+            "acquisition, Y.Y. All authors have read and agreed to the "
+            "published version of the manuscript.",
         )
         add_para(
             doc,
@@ -630,6 +753,8 @@ def rewrite() -> None:
         body_text = text
         if pi in TABLE_CITATION_INJECTIONS:
             body_text = body_text.rstrip() + TABLE_CITATION_INJECTIONS[pi]
+        if pi in FIGURE_CITATION_INJECTIONS:
+            body_text = body_text.rstrip() + FIGURE_CITATION_INJECTIONS[pi]
         for needle, expansion in ACRONYM_FIRST_USE_REPLACEMENTS.items():
             if needle in acronyms_expanded:
                 continue
