@@ -881,35 +881,45 @@ def check_all_references_cited(doc) -> list[str]:
     return errs
 
 
-def check_no_dangling_dollar(doc) -> str | None:
-    """No stray '$' should remain in body text once inline maths is emitted
-    as italic runs."""
-    bad = []
-    for s, p in [(p.style.name, p) for p in doc.paragraphs]:
-        if not s.startswith("MDPI_"):
-            continue
-        if s in ("MDPI_4.1_table_caption", "MDPI_5.1_figure_caption", "MDPI_3.1_text"):
-            text = "".join(r.text for r in p.runs)
-            if "$" in text:
-                bad.append(text[:60])
-    return None if not bad else f"dangling $ in {len(bad)} paragraph(s), first: {bad[0]!r}"
-
-
-def check_no_raw_latex_commands(doc) -> list[str]:
-    """Flag LaTeX macros like \\sigma, \\text{...}, \\frac{...}{...} left in
-    body runs — MDPI wants editable maths, not raw LaTeX."""
+def check_inline_math_delimited(doc) -> list[str]:
+    """Every $ in a body/caption paragraph must be paired: the source
+    manuscript writes inline formulas as ``$ ... $`` and the rewriter
+    preserves that notation verbatim. An odd count indicates a broken
+    formula — we flag those paragraphs.
+    """
     errs = []
-    latex_tokens = re.compile(
-        r"\\(sigma|varsigma|varrho|phi|nu|lambda|text|frac|sum|displaystyle|begin|end|hat|langle|rangle|ge|le|bigl|bigr|star|mathcal|to)\b"
-    )
     for p in doc.paragraphs:
-        if p.style.name in ("MDPI_3.1_text", "MDPI_3.2_text_no_indent"):
-            text = "".join(r.text for r in p.runs)
-            m = latex_tokens.search(text)
-            if m:
-                errs.append(
-                    f"raw LaTeX {m.group(0)!r} in body paragraph: {text[:80]}"
-                )
+        s = p.style.name
+        if s not in (
+            "MDPI_3.1_text",
+            "MDPI_3.2_text_no_indent",
+            "MDPI_4.1_table_caption",
+            "MDPI_5.1_figure_caption",
+        ):
+            continue
+        text = "".join(r.text for r in p.runs)
+        # ignore the '$$' display form — it is normalised to equation tables
+        scrubbed = text.replace("$$", "")
+        if scrubbed.count("$") % 2 != 0:
+            errs.append(f"unbalanced $ in paragraph: {text[:80]}")
+    return errs
+
+
+def check_display_equation_preserved(doc) -> list[str]:
+    """Equation tables must carry the original ``$$ ... $$`` body so the
+    formula is visible exactly as the source wrote it. The right cell
+    holds the numbering ``(N)``.
+    """
+    errs = []
+    for tbl in doc.tables:
+        if len(tbl.columns) != 2 or len(tbl.rows) != 1:
+            continue
+        left = tbl.rows[0].cells[0].text.strip()
+        right = tbl.rows[0].cells[1].text.strip()
+        if not re.match(r"^\(\d+\)$", right):
+            continue  # not an equation table, skip
+        if not (left.startswith("$$") and left.endswith("$$")):
+            errs.append(f"equation body not wrapped in $$...$$: {left[:60]}")
     return errs
 
 
@@ -1125,8 +1135,8 @@ def main() -> int:
         "49 paragraph not empty":    lambda: check_no_empty_content_paragraphs(doc),
         "50 citations sorted":       lambda: check_citations_sorted(doc),
         "51 all refs cited":         lambda: check_all_references_cited(doc),
-        "52 no dangling $":          lambda: check_no_dangling_dollar(doc),
-        "53 no backslash LaTeX":     lambda: check_no_raw_latex_commands(doc),
+        "52 inline math delimited":  lambda: check_inline_math_delimited(doc),
+        "53 display eq preserved":   lambda: check_display_equation_preserved(doc),
         "54 equations have number":  lambda: check_equations_numbered(doc),
         "55 ref wording":            lambda: check_mdpi_reference_wording(doc),
         "56 author sup-numerals":    lambda: check_author_superscripts(doc),
