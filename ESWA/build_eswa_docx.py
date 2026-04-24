@@ -32,107 +32,107 @@ REFS_APA = [
     # Each tuple: (ref_number_in_original, intext_short [APA 7th, 3+ authors
     # collapsed to "et al." already], full_apa_entry)
     (1, "Bachelier (1900)",
-     "Bachelier, L. (1900). Theorie de la speculation. Annales Scientifiques de l'Ecole Normale Superieure, 17, 21\u201386."),
+     "Bachelier, L. (1900). Theorie de la speculation. Annales Scientifiques de l'Ecole Normale Superieure, 17, 21\u201386. https://doi.org/10.24033/asens.476"),
     (2, "Mandelbrot (1963)",
-     "Mandelbrot, B. B. (1963). The variation of certain speculative prices. The Journal of Business, 36(4), 394\u2013419."),
+     "Mandelbrot, B. B. (1963). The variation of certain speculative prices. The Journal of Business, 36(4), 394\u2013419. https://doi.org/10.1086/294632"),
     (3, "Mandelbrot (1997)",
-     "Mandelbrot, B. B. (1997). Fractals and scaling in finance. Springer."),
+     "Mandelbrot, B. B. (1997). Fractals and scaling in finance. Springer. ISBN: 978-0-387-98363-9."),
     (4, "Embrechts and Maejima (2002)",
-     "Embrechts, P., & Maejima, M. (2002). Selfsimilar processes. Princeton University Press."),
+     "Embrechts, P., & Maejima, M. (2002). Selfsimilar processes. Princeton University Press. ISBN: 978-0-691-09627-8."),
     (5, "Iovane et al. (2004)",
-     "Iovane, G., Laserra, E., & Tortoriello, F. S. (2004). Stochastic self-similar and fractal universe. Chaos, Solitons & Fractals, 20(3), 415\u2013426."),
+     "Iovane, G., Laserra, E., & Tortoriello, F. S. (2004). Stochastic self-similar and fractal universe. Chaos, Solitons & Fractals, 20(3), 415\u2013426. https://doi.org/10.1016/j.chaos.2003.08.004"),
     (6, "Daubechies (1992)",
-     "Daubechies, I. (1992). Ten lectures on wavelets. Society for Industrial and Applied Mathematics."),
+     "Daubechies, I. (1992). Ten lectures on wavelets. Society for Industrial and Applied Mathematics. ISBN: 978-0-89871-274-2."),
     (7, "Mallat (2008)",
-     "Mallat, S. (2008). A wavelet tour of signal processing (3rd ed.). Academic Press."),
+     "Mallat, S. (2008). A wavelet tour of signal processing (3rd ed.). Academic Press. ISBN: 978-0-12-374370-1."),
     (8, "Mantegna and Stanley (2000)",
-     "Mantegna, R. N., & Stanley, H. E. (2000). An introduction to econophysics: Correlations and complexity in finance. Cambridge University Press."),
+     "Mantegna, R. N., & Stanley, H. E. (2000). An introduction to econophysics: Correlations and complexity in finance. Cambridge University Press. ISBN: 978-0-521-62008-6."),
     (9, "Di Matteo (2007)",
-     "Di Matteo, T. (2007). Multi-scaling in finance. Quantitative Finance, 7(1), 21\u201336."),
+     "Di Matteo, T. (2007). Multi-scaling in finance. Quantitative Finance, 7(1), 21\u201336. https://doi.org/10.1080/14697680600969727"),
     (10, "Morales et al. (2013)",
-     "Morales, R., Di Matteo, T., & Aste, T. (2013). Non-stationary multifractality in stock returns. Physica A: Statistical Mechanics and Its Applications, 392(24), 6470\u20136483."),
+     "Morales, R., Di Matteo, T., & Aste, T. (2013). Non-stationary multifractality in stock returns. Physica A: Statistical Mechanics and Its Applications, 392(24), 6470\u20136483. https://doi.org/10.1016/j.physa.2013.08.037"),
     (11, "Cont (2001)",
-     "Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. Quantitative Finance, 1(2), 223\u2013236."),
+     "Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. Quantitative Finance, 1(2), 223\u2013236. https://doi.org/10.1080/713665670"),
     (12, "Schwert (1989)",
-     "Schwert, G. W. (1989). Why does stock market volatility change over time? The Journal of Finance, 44(5), 1115\u20131153."),
+     "Schwert, G. W. (1989). Why does stock market volatility change over time? The Journal of Finance, 44(5), 1115\u20131153. https://doi.org/10.1111/j.1540-6261.1989.tb02647.x"),
     (13, "Poon and Granger (2003)",
-     "Poon, S.-H., & Granger, C. W. J. (2003). Forecasting volatility in financial markets: A review. Journal of Economic Literature, 41(2), 478\u2013539."),
+     "Poon, S.-H., & Granger, C. W. J. (2003). Forecasting volatility in financial markets: A review. Journal of Economic Literature, 41(2), 478\u2013539. https://doi.org/10.1257/002205103765762743"),
     (14, "Iovane et al. (2021)",
-     "Iovane, G., Briscione, A., & Benedetto, E. (2021). Financion: A quantum approach to financial market modelling. Journal of Statistics & Management Systems, 24(5), 1127\u20131149."),
+     "Iovane, G., Briscione, A., & Benedetto, E. (2021). Financion: A quantum approach to financial market modelling. Journal of Statistics & Management Systems, 24(5), 1127\u20131149. https://doi.org/10.1080/09720510.2021.1930665"),
     (15, "Iovane et al. (2016)",
-     "Iovane, G., Landi, A., & Serino, S. (2016). An optimized mathematical-physical approach to financial market. Journal of Information & Optimization Sciences, 37(3), 423\u2013448."),
+     "Iovane, G., Landi, A., & Serino, S. (2016). An optimized mathematical-physical approach to financial market. Journal of Information & Optimization Sciences, 37(3), 423\u2013448. https://doi.org/10.1080/02522667.2015.1105526"),
     (16, "Iovane (2024a)",
-     "Iovane, G. (2024a). Decision support system driven by thermo-complexity: Algorithms. IEEE Access, 12, 157359\u2013157382."),
+     "Iovane, G. (2024a). Decision support system driven by thermo-complexity: Algorithms. IEEE Access, 12, 157359\u2013157382. https://doi.org/10.1109/ACCESS.2024.3482711"),
     (17, "Iovane and Chinnici (2024)",
-     "Iovane, G., & Chinnici, M. (2024). DSS driven by thermo-complexity: Scenario analysis. Applied Sciences, 14(6), 2387."),
+     "Iovane, G., & Chinnici, M. (2024). DSS driven by thermo-complexity: Scenario analysis. Applied Sciences, 14(6), 2387. https://doi.org/10.3390/app14062387"),
     (18, "Iovane (2026a)",
      "Iovane, G. (2026a). MRQF-MAS: A multiscale relativistic quantum finance framework for cooperative multi-agent trading systems with shared knowledge base [Unpublished manuscript, available on request]."),
     (19, "Iovane (2026b)",
      "Iovane, G. (2026b). P-MRQF-MAS: An interpretable cooperative multi-agent framework for high-volatility regime forecasting on the energy\u2013entropy plane [Unpublished manuscript, available on request]."),
     (20, "Wooldridge (2009)",
-     "Wooldridge, M. (2009). An introduction to multiagent systems (2nd ed.). Wiley."),
+     "Wooldridge, M. (2009). An introduction to multiagent systems (2nd ed.). Wiley. ISBN: 978-0-470-51946-2."),
     (21, "Shavandi and Khedmati (2022)",
-     "Shavandi, A., & Khedmati, M. (2022). A multi-agent deep reinforcement learning framework for algorithmic trading in financial markets. Expert Systems with Applications, 208, 118124."),
+     "Shavandi, A., & Khedmati, M. (2022). A multi-agent deep reinforcement learning framework for algorithmic trading in financial markets. Expert Systems with Applications, 208, 118124. https://doi.org/10.1016/j.eswa.2022.118124"),
     (22, "Hosseini Rad and Tahmasebi Khorasani (2024)",
      "Hosseini Rad, S., & Tahmasebi Khorasani, S. (2024). Cooperative multi-agent deep reinforcement learning for Forex trading. In Proceedings of the IEEE AISP. IEEE."),
     (23, "Chen and Guestrin (2016)",
-     "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (pp. 785\u2013794). ACM."),
+     "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (pp. 785\u2013794). ACM. https://doi.org/10.1145/2939672.2939785"),
     (24, "Lim and Zohren (2021)",
-     "Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: A survey. Philosophical Transactions of the Royal Society A, 379(2194), Article 20200209."),
+     "Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: A survey. Philosophical Transactions of the Royal Society A, 379(2194), Article 20200209. https://doi.org/10.1098/rsta.2020.0209"),
     (25, "Nelson (1991)",
-     "Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. Econometrica, 59(2), 347\u2013370."),
+     "Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. Econometrica, 59(2), 347\u2013370. https://doi.org/10.2307/2938260"),
     (26, "Bouchaud and Potters (2003)",
-     "Bouchaud, J.-P., & Potters, M. (2003). Theory of financial risk and derivative pricing (2nd ed.). Cambridge University Press."),
+     "Bouchaud, J.-P., & Potters, M. (2003). Theory of financial risk and derivative pricing (2nd ed.). Cambridge University Press. ISBN: 978-0-521-81916-9."),
     (27, "Lundberg and Lee (2017)",
-     "Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems (Vol. 30, pp. 4765\u20134774)."),
+     "Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems (Vol. 30, pp. 4765\u20134774). https://doi.org/10.48550/arXiv.1705.07874"),
     (28, "Peters (1994)",
-     "Peters, E. E. (1994). Fractal market analysis: Applying chaos theory to investment and economics. Wiley."),
+     "Peters, E. E. (1994). Fractal market analysis: Applying chaos theory to investment and economics. Wiley. ISBN: 978-0-471-58524-4."),
     (29, "Bessembinder and Seguin (1993)",
-     "Bessembinder, H., & Seguin, P. J. (1993). Price volatility, trading volume, and market depth: Evidence from futures markets. The Journal of Financial and Quantitative Analysis, 28(1), 21\u201339."),
+     "Bessembinder, H., & Seguin, P. J. (1993). Price volatility, trading volume, and market depth: Evidence from futures markets. The Journal of Financial and Quantitative Analysis, 28(1), 21\u201339. https://doi.org/10.2307/2331149"),
     (30, "Jaynes (1957)",
-     "Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review, 106(4), 620\u2013630."),
+     "Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review, 106(4), 620\u2013630. https://doi.org/10.1103/PhysRev.106.620"),
     (31, "Dacorogna et al. (2001)",
-     "Dacorogna, M. M., Gencay, R., Muller, U., Olsen, R. B., & Pictet, O. V. (2001). An introduction to high-frequency finance. Academic Press."),
+     "Dacorogna, M. M., Gencay, R., Muller, U., Olsen, R. B., & Pictet, O. V. (2001). An introduction to high-frequency finance. Academic Press. ISBN: 978-0-12-279671-5."),
     (32, "Kahneman and Tversky (1979)",
-     "Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. Econometrica, 47(2), 263\u2013292."),
+     "Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. Econometrica, 47(2), 263\u2013292. https://doi.org/10.2307/1914185"),
     (33, "European Parliament and Council (2024)",
-     "European Parliament and Council. (2024). Regulation (EU) 2024/1689 of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act). Official Journal of the European Union."),
+     "European Parliament and Council. (2024). Regulation (EU) 2024/1689 of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act). Official Journal of the European Union. CELEX: 32024R1689. http://data.europa.eu/eli/reg/2024/1689/oj"),
     (34, "Cover and Thomas (2006)",
-     "Cover, T. M., & Thomas, J. A. (2006). Elements of information theory (2nd ed.). Wiley."),
+     "Cover, T. M., & Thomas, J. A. (2006). Elements of information theory (2nd ed.). Wiley. ISBN: 978-0-471-24195-9."),
     (35, "Brownlees and Gallo (2006)",
-     "Brownlees, C. T., & Gallo, G. M. (2006). Financial econometric analysis at ultra-high frequency: Data handling concerns. Computational Statistics & Data Analysis, 51(4), 2232\u20132245."),
+     "Brownlees, C. T., & Gallo, G. M. (2006). Financial econometric analysis at ultra-high frequency: Data handling concerns. Computational Statistics & Data Analysis, 51(4), 2232\u20132245. https://doi.org/10.1016/j.csda.2006.09.030"),
     (36, "Engle (1982)",
-     "Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. Econometrica, 50(4), 987\u20131007."),
+     "Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. Econometrica, 50(4), 987\u20131007. https://doi.org/10.2307/1912773"),
     (37, "Diebold and Mariano (1995)",
-     "Diebold, F. X., & Mariano, R. S. (1995). Comparing predictive accuracy. Journal of Business & Economic Statistics, 13(3), 253\u2013263."),
+     "Diebold, F. X., & Mariano, R. S. (1995). Comparing predictive accuracy. Journal of Business & Economic Statistics, 13(3), 253\u2013263. https://doi.org/10.1080/07350015.1995.10524599"),
     (38, "Landis and Koch (1977)",
-     "Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159\u2013174."),
+     "Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159\u2013174. https://doi.org/10.2307/2529310"),
     (39, "Deng et al. (2017)",
-     "Deng, Y., Bao, F., Kong, Y., Ren, Z., & Dai, Q. (2017). Deep direct reinforcement learning for financial signal representation and trading. IEEE Transactions on Neural Networks and Learning Systems, 28(3), 653\u2013664."),
+     "Deng, Y., Bao, F., Kong, Y., Ren, Z., & Dai, Q. (2017). Deep direct reinforcement learning for financial signal representation and trading. IEEE Transactions on Neural Networks and Learning Systems, 28(3), 653\u2013664. https://doi.org/10.1109/TNNLS.2016.2522401"),
     (40, "Moody and Saffell (2001)",
-     "Moody, J., & Saffell, M. (2001). Learning to trade via direct reinforcement. IEEE Transactions on Neural Networks, 12(4), 875\u2013889."),
+     "Moody, J., & Saffell, M. (2001). Learning to trade via direct reinforcement. IEEE Transactions on Neural Networks, 12(4), 875\u2013889. https://doi.org/10.1109/72.935097"),
     (41, "Hochreiter and Schmidhuber (1997)",
-     "Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735\u20131780."),
+     "Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735\u20131780. https://doi.org/10.1162/neco.1997.9.8.1735"),
     (42, "Vaswani et al. (2017)",
-     "Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all you need. In Advances in Neural Information Processing Systems (Vol. 30, pp. 5998\u20136008)."),
+     "Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all you need. In Advances in Neural Information Processing Systems (Vol. 30, pp. 5998\u20136008). https://doi.org/10.48550/arXiv.1706.03762"),
     (43, "Bollerslev (1986)",
-     "Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. Journal of Econometrics, 31(3), 307\u2013327."),
+     "Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. Journal of Econometrics, 31(3), 307\u2013327. https://doi.org/10.1016/0304-4076(86)90063-1"),
     (44, "Corsi (2009)",
-     "Corsi, F. (2009). A simple approximate long-memory model of realized volatility. Journal of Financial Econometrics, 7(2), 174\u2013196."),
+     "Corsi, F. (2009). A simple approximate long-memory model of realized volatility. Journal of Financial Econometrics, 7(2), 174\u2013196. https://doi.org/10.1093/jjfinec/nbp001"),
     (45, "Iovane et al. (2020)",
-     "Iovane, G., Amorosia, F. S., Benedetto, E., & Lamponi, G. (2020). Decision and reasoning in incompleteness or uncertainty conditions. IEEE Access, 8, 115109\u2013115122."),
+     "Iovane, G., Amorosia, F. S., Benedetto, E., & Lamponi, G. (2020). Decision and reasoning in incompleteness or uncertainty conditions. IEEE Access, 8, 115109\u2013115122. https://doi.org/10.1109/ACCESS.2020.3003726"),
     (46, "Blackledge and Murphy (2011)",
-     "Blackledge, J. M., & Murphy, K. (2011). Currency trading using the fractal market hypothesis. In Risk management trends. IntechOpen."),
+     "Blackledge, J. M., & Murphy, K. (2011). Currency trading using the fractal market hypothesis. In Risk management trends. IntechOpen. https://doi.org/10.5772/16249"),
     (47, "Calvet and Fisher (2008)",
-     "Calvet, L. E., & Fisher, A. J. (2008). Multifractal volatility: Theory, forecasting, and pricing. Academic Press."),
+     "Calvet, L. E., & Fisher, A. J. (2008). Multifractal volatility: Theory, forecasting, and pricing. Academic Press. ISBN: 978-0-12-150013-9."),
     (48, "Wolpert (1992)",
-     "Wolpert, D. H. (1992). Stacked generalization. Neural Networks, 5(2), 241\u2013259."),
+     "Wolpert, D. H. (1992). Stacked generalization. Neural Networks, 5(2), 241\u2013259. https://doi.org/10.1016/S0893-6080(05)80023-1"),
     (49, "Van der Laan et al. (2007)",
-     "Van der Laan, M. J., Polley, E. C., & Hubbard, A. E. (2007). Super learner. Statistical Applications in Genetics and Molecular Biology, 6(1), Article 25."),
+     "Van der Laan, M. J., Polley, E. C., & Hubbard, A. E. (2007). Super learner. Statistical Applications in Genetics and Molecular Biology, 6(1), Article 25. https://doi.org/10.2202/1544-6115.1309"),
     (50, "Politis and Romano (1994)",
-     "Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428), 1303\u20131313."),
+     "Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428), 1303\u20131313. https://doi.org/10.1080/01621459.1994.10476870"),
     (51, "Friedman (1937)",
-     "Friedman, M. (1937). The use of ranks to avoid the assumption of normality implicit in the analysis of variance. Journal of the American Statistical Association, 32(200), 675\u2013701."),
+     "Friedman, M. (1937). The use of ranks to avoid the assumption of normality implicit in the analysis of variance. Journal of the American Statistical Association, 32(200), 675\u2013701. https://doi.org/10.1080/01621459.1937.10503522"),
     (52, "Nemenyi (1963)",
      "Nemenyi, P. B. (1963). Distribution-free multiple comparisons [Doctoral dissertation, Princeton University]. See also Dem\u0161ar, J. (2006). Statistical comparisons of classifiers over multiple data sets. Journal of Machine Learning Research, 7, 1\u201330."),
     (53, "Iovane and Iovane (2026)",
@@ -1718,6 +1718,22 @@ def add_table(doc, rows):
     tbl = doc.add_table(rows=n_rows, cols=n_cols)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     tbl.autofit = True
+    # Force "Table Normal" style (no default grid); then clear any table-level borders
+    try:
+        tbl.style = doc.styles['Table Normal']
+    except KeyError:
+        pass
+    tblPr = tbl._element.find(qn('w:tblPr'))
+    if tblPr is not None:
+        existing_borders = tblPr.find(qn('w:tblBorders'))
+        if existing_borders is not None:
+            tblPr.remove(existing_borders)
+        tblBorders = OxmlElement('w:tblBorders')
+        for side in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+            el = OxmlElement(f'w:{side}')
+            el.set(qn('w:val'), 'nil')
+            tblBorders.append(el)
+        tblPr.append(tblBorders)
     for ri, row in enumerate(rows):
         for ci, val in enumerate(row):
             cell = tbl.cell(ri, ci)
@@ -1850,6 +1866,27 @@ def build():
              size=Pt(16), bold=True,
              line_spacing=1.2,
              space_before=0, space_after=18)
+
+    # Highlights (Elsevier requirement: 3-5 bullets, each <=85 characters)
+    hl_head = doc.add_paragraph()
+    hl_head.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    hl_head.paragraph_format.space_before = Pt(0)
+    hl_head.paragraph_format.space_after = Pt(4)
+    r = hl_head.add_run("Highlights")
+    set_run(r, size=Pt(12), bold=True)
+    for item in HIGHLIGHTS:
+        hl_p = doc.add_paragraph()
+        hl_p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        hl_p.paragraph_format.line_spacing = 1.15
+        hl_p.paragraph_format.space_after = Pt(2)
+        hl_p.paragraph_format.left_indent = Cm(0.5)
+        hl_p.paragraph_format.first_line_indent = Cm(-0.5)
+        bullet = hl_p.add_run("• ")
+        set_run(bullet, size=Pt(11))
+        run = hl_p.add_run(item)
+        set_run(run, size=Pt(11))
+    # Spacer before Abstract
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
     # Abstract
     ab_head = doc.add_paragraph()
