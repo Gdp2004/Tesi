@@ -49,7 +49,7 @@ REFS_APA = [
      "Mantegna, R. N., & Stanley, H. E. (2000). An introduction to econophysics: Correlations and complexity in finance. Cambridge University Press."),
     (9, "Di Matteo (2007)",
      "Di Matteo, T. (2007). Multi-scaling in finance. Quantitative Finance, 7(1), 21\u201336."),
-    (10, "Morales, Di Matteo, and Aste (2013)",
+    (10, "Morales et al. (2013)",
      "Morales, R., Di Matteo, T., & Aste, T. (2013). Non-stationary multifractality in stock returns. Physica A: Statistical Mechanics and Its Applications, 392(24), 6470\u20136483."),
     (11, "Cont (2001)",
      "Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. Quantitative Finance, 1(2), 223\u2013236."),
@@ -57,9 +57,9 @@ REFS_APA = [
      "Schwert, G. W. (1989). Why does stock market volatility change over time? The Journal of Finance, 44(5), 1115\u20131153."),
     (13, "Poon and Granger (2003)",
      "Poon, S.-H., & Granger, C. W. J. (2003). Forecasting volatility in financial markets: A review. Journal of Economic Literature, 41(2), 478\u2013539."),
-    (14, "Iovane, Briscione, and Benedetto (2021)",
+    (14, "Iovane et al. (2021)",
      "Iovane, G., Briscione, A., & Benedetto, E. (2021). Financion: A quantum approach to financial market modelling. Journal of Statistics & Management Systems, 24(5), 1127\u20131149."),
-    (15, "Iovane, Landi, and Serino (2016)",
+    (15, "Iovane et al. (2016)",
      "Iovane, G., Landi, A., & Serino, S. (2016). An optimized mathematical-physical approach to financial market. Journal of Information & Optimization Sciences, 37(3), 423\u2013448."),
     (16, "Iovane (2024a)",
      "Iovane, G. (2024a). Decision support system driven by thermo-complexity: Algorithms. IEEE Access, 12, 157359\u2013157382."),
@@ -91,7 +91,7 @@ REFS_APA = [
      "Bessembinder, H., & Seguin, P. J. (1993). Price volatility, trading volume, and market depth: Evidence from futures markets. The Journal of Financial and Quantitative Analysis, 28(1), 21\u201339."),
     (30, "Jaynes (1957)",
      "Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review, 106(4), 620\u2013630."),
-    (31, "Dacorogna, Gencay, Muller, Olsen, and Pictet (2001)",
+    (31, "Dacorogna et al. (2001)",
      "Dacorogna, M. M., Gencay, R., Muller, U., Olsen, R. B., & Pictet, O. V. (2001). An introduction to high-frequency finance. Academic Press."),
     (32, "Kahneman and Tversky (1979)",
      "Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. Econometrica, 47(2), 263\u2013292."),
@@ -107,7 +107,7 @@ REFS_APA = [
      "Diebold, F. X., & Mariano, R. S. (1995). Comparing predictive accuracy. Journal of Business & Economic Statistics, 13(3), 253\u2013263."),
     (38, "Landis and Koch (1977)",
      "Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159\u2013174."),
-    (39, "Deng, Bao, Kong, Ren, and Dai (2017)",
+    (39, "Deng et al. (2017)",
      "Deng, Y., Bao, F., Kong, Y., Ren, Z., & Dai, Q. (2017). Deep direct reinforcement learning for financial signal representation and trading. IEEE Transactions on Neural Networks and Learning Systems, 28(3), 653\u2013664."),
     (40, "Moody and Saffell (2001)",
      "Moody, J., & Saffell, M. (2001). Learning to trade via direct reinforcement. IEEE Transactions on Neural Networks, 12(4), 875\u2013889."),
@@ -127,7 +127,7 @@ REFS_APA = [
      "Calvet, L. E., & Fisher, A. J. (2008). Multifractal volatility: Theory, forecasting, and pricing. Academic Press."),
     (48, "Wolpert (1992)",
      "Wolpert, D. H. (1992). Stacked generalization. Neural Networks, 5(2), 241\u2013259."),
-    (49, "Van der Laan, Polley, and Hubbard (2007)",
+    (49, "Van der Laan et al. (2007)",
      "Van der Laan, M. J., Polley, E. C., & Hubbard, A. E. (2007). Super learner. Statistical Applications in Genetics and Molecular Biology, 6(1), Article 25."),
     (50, "Politis and Romano (1994)",
      "Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428), 1303\u20131313."),
@@ -1304,15 +1304,9 @@ BODY = [
      "edited the content as needed and take full responsibility for the "
      "content of the published article."),
 
-    # --- References section ---
-    ("h1", "References"),
 ]
 
-# Append APA references (alphabetical + chronological)
-for _, _, full in REFS_APA_SORTED:
-    BODY.append(("ref", full))
-
-# --- Appendix A ---
+# --- Appendix A (placed before References per Elsevier convention) ---
 BODY.extend([
     ("h1", "Appendix A. Reproducibility"),
     ("h2", "A.1. Software Stack"),
@@ -1349,6 +1343,11 @@ BODY.extend([
      "not add value because the two base models capture overlapping "
      "information."),
 ])
+
+# --- References section (appears last) ---
+BODY.append(("h1", "References"))
+for _, _, full in REFS_APA_SORTED:
+    BODY.append(("ref", full))
 
 # ---------------------------------------------------------------------------
 # 4. Citation rewrite: numbered [n] citations -> APA (Author, Year)
