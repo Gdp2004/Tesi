@@ -359,7 +359,8 @@ BODY = [
      "conditional variance at three horizons and SKB occupancy "
      "probabilities. The 20-dimensional feature vector is consumed by the "
      "gradient-boosted decision layer to produce the regime-transition "
-     "probability P\u0302(y\u209C = 1 | F\u209C)."),
+     "probability P\u0302(y\u209C = 1 | F\u209C).",
+     "figures/fig1_architecture.png"),
 
     ("h1", "2. Theoretical Elements of MRQF Used as Feature-Generation Building Blocks"),
     ("p",
@@ -396,7 +397,8 @@ BODY = [
      "percentile cuts (quartiles, halves) is discussed in Section 8.1."),
     ("fig",
      "Figure 2. The (E, S) plane with nine regions defined by tertiles of "
-     "the two coordinates."),
+     "the two coordinates.",
+     "figures/fig2_ES_plane.png"),
 
     ("h1", "3. Feature Construction"),
 
@@ -665,7 +667,8 @@ BODY = [
      "\u03C6\u0302_{128}(t) across six pairs (violin plots, 1999\u20132026). "
      "The golden-mean value \u03C6 = 0.618 (red dashed) is exceeded by at "
      "most 5.8 % of windows on any pair; the empirical median (green) "
-     "clusters in [0.443, 0.454]."),
+     "clusters in [0.443, 0.454].",
+     "figures/fig3_fractal_exponent.png"),
 
     ("h2", "6.2. Regime-Transition Forecasting: Per-Pair Performance"),
     ("p",
@@ -691,7 +694,8 @@ BODY = [
      "here uses the original untuned configuration for visual comparability "
      "across all six pairs; after per-pair hyperparameter tuning on "
      "USD/JPY/CAD (Table 1), LSTM bars on those three pairs shrink and "
-     "P-MRQF-MS dominates on all six pairs."),
+     "P-MRQF-MS dominates on all six pairs.",
+     "figures/fig4_per_pair_mcc.png"),
 
     ("h2", "6.3. Cross-Pair Wilcoxon Signed-Rank Tests"),
     ("p",
@@ -757,7 +761,8 @@ BODY = [
      "Points above the diagonal indicate P-MRQF-MS wins. This figure uses "
      "the untuned LSTM MCCs for consistency with the raw Step C "
      "evaluation; the tuned version (Table 1) shifts USD, JPY, CAD points "
-     "further above the diagonal, strengthening the conclusion."),
+     "further above the diagonal, strengthening the conclusion.",
+     "figures/fig5_mcc_scatter.png"),
 
     ("h2", "6.5. Diebold\u2013Mariano Tests on Probability Loss"),
     ("p",
@@ -796,7 +801,8 @@ BODY = [
      "Figure 6. Real (E, S)-plane trajectories during the COVID-19 shock "
      "(2020-01-01 to 2020-05-30) across six FX pairs. Each trajectory is "
      "colour-coded from blue (start) to red (end); every pair exhibits the "
-     "qualitative rising-then-relaxing transition predicted by MRQF."),
+     "qualitative rising-then-relaxing transition predicted by MRQF.",
+     "figures/fig6_ES_covid.png"),
 
     ("h2", "6.7. Temporal Heterogeneity Across Forecast Horizons"),
     ("p",
@@ -880,7 +886,8 @@ BODY = [
      "operating point used in the main paper. Right: the complex-time "
      "interpretation of the three patterns, with anticipatory behaviour "
      "mapped to imagination dominance (Im(T) > 0) and reactive behaviour "
-     "to memory dominance (Im(T) < 0)."),
+     "to memory dominance (Im(T) < 0).",
+     "figures/fig7_horizons.png"),
 
     ("h1", "7. Ablation and Negative Stacking Result"),
 
@@ -927,7 +934,8 @@ BODY = [
      "\u0394MCC when the group is removed; blue = positive (removal helps, "
      "feature redundant), red = negative (removal hurts, feature useful). "
      "Annotations on the right: cross-pair mean \u0394, number of pairs "
-     "hurt by removal, Wilcoxon p-value (uncorrected)."),
+     "hurt by removal, Wilcoxon p-value (uncorrected).",
+     "figures/fig8_ablation.png"),
 
     ("h2", "7.2. Stacking P-MRQF-MS + LSTM: Negative Result"),
     ("p",
@@ -1365,8 +1373,14 @@ def citation_rewrite(text):
 def rewrite_body(body):
     out = []
     for entry in body:
-        if entry[0] in ("p", "fig"):
+        if entry[0] == "p":
             out.append((entry[0], citation_rewrite(entry[1])))
+        elif entry[0] == "fig":
+            # Preserve optional image path (entry[2] if present)
+            if len(entry) > 2:
+                out.append((entry[0], citation_rewrite(entry[1]), entry[2]))
+            else:
+                out.append((entry[0], citation_rewrite(entry[1])))
         elif entry[0] == "tbl":
             # preserve the (kind, table-key, caption) structure
             out.append((entry[0], entry[1], citation_rewrite(entry[2])))
@@ -1491,16 +1505,20 @@ def add_equation(doc, text):
     set_run(run, size=BODY_SIZE, italic=True)
     return p
 
-def add_figure_caption(doc, text):
-    """ESWA: figure captions below the figure. We only have captions (artwork
-    supplied as separate files)."""
-    # Placeholder where the figure would be (since artwork is separate files)
+def add_figure_caption(doc, text, image_path=None, width_cm=15.5):
+    """ESWA: figure captions below the figure. If image_path is provided, the
+    image is embedded above the caption at width_cm; otherwise a placeholder
+    is rendered."""
+    # Figure itself (image if provided, otherwise placeholder)
     ph = doc.add_paragraph()
     ph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ph_run = ph.add_run("[Figure placeholder \u2013 artwork file supplied separately]")
-    set_run(ph_run, size=Pt(10), italic=True, color=RGBColor(0x80, 0x80, 0x80))
     ph.paragraph_format.space_before = Pt(6)
     ph.paragraph_format.space_after = Pt(3)
+    if image_path:
+        ph.add_run().add_picture(image_path, width=Cm(width_cm))
+    else:
+        ph_run = ph.add_run("[Figure placeholder \u2013 artwork file supplied separately]")
+        set_run(ph_run, size=Pt(10), italic=True, color=RGBColor(0x80, 0x80, 0x80))
     # Caption itself
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -1740,7 +1758,8 @@ def build():
         elif kind == "eq":
             add_equation(doc, entry[1])
         elif kind == "fig":
-            add_figure_caption(doc, entry[1])
+            img = entry[2] if len(entry) > 2 else None
+            add_figure_caption(doc, entry[1], image_path=img)
         elif kind == "tbl":
             _, key, caption = entry
             add_table_caption(doc, caption)
