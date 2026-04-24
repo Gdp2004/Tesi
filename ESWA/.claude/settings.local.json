@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import docx; print\\(docx.__version__\\)\")",
+      "Bash(pyenv global *)",
+      "Bash(pip show *)",
+      "Bash(py --version)",
+      "Bash(py -m pip show python-docx)",
+      "Bash(py -c ' *)",
+      "Bash(py build_eswa_docx.py)"
+    ]
+  }
+}

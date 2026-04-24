@@ -1,0 +1,30 @@
+=== TABLE 0 (6 rows x 8 cols) ===
+R0: Method | USD | GBP | JPY | CHF | CAD | AUD | Mean
+R1: Persistence | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000
+R2: XGB classical | 0.225 | 0.239 | 0.344 | 0.177 | 0.386 | 0.338 | 0.285
+R3: Logistic all-feat. | 0.169 | 0.307 | 0.344 | 0.071 | 0.324 | 0.255 | 0.245
+R4: LSTM ens. (tuned) | 0.208 | 0.291 | 0.354 | 0.145 | 0.410 | 0.295 | 0.284
+R5: P-MRQF-MS (ours) | 0.254 | 0.300 | 0.361 | 0.246 | 0.417 | 0.375 | 0.326
+=== TABLE 1 (5 rows x 5 cols) ===
+R0: Baseline | Mean Δ | Wins | Wilcoxon $p$ | $p$ (Holm)
+R1: Persistence | +0.326 | 6/6 | 0.031 | 0.125
+R2: XGB classical | +0.041 | 6/6 | 0.031 | 0.125
+R3: Logistic all-feat. | +0.081 | 5/6 | 0.063 | 0.125
+R4: LSTM ens. (tuned) | +0.042 | 6/6 | 0.031 | 0.125
+=== TABLE 2 (7 rows x 6 cols) ===
+R0: Pair | vs Persist. | vs XGB-cl. | vs Logistic | vs LSTM | Verdict
+R1: USD | DM=+0.96 p=0.34 | DM=+6.06 p<0.001** | DM=+14.5 p<0.001** | DM=+7.49 p<0.001** | P-MRQF wins
+R2: GBP | DM=+5.92 p<0.001** | DM=+5.88 p<0.001** | DM=+9.08 p<0.001** | DM=+5.88 p<0.001** | P-MRQF wins
+R3: JPY | DM=+1.78 p=0.07 | DM=+7.44 p<0.001** | DM=+8.25 p<0.001** | DM=+5.69 p<0.001** | P-MRQF wins
+R4: CHF | DM=+8.55 p<0.001** | DM=+5.03 p<0.001** | DM=+8.98 p<0.001** | DM=+1.94 p=0.05 | P-MRQF wins
+R5: CAD | DM=+4.36 p<0.001** | DM=+5.48 p<0.001** | DM=+13.9 p<0.001** | DM=+4.82 p<0.001** | P-MRQF wins
+R6: AUD | DM=+6.40 p<0.001** | DM=+5.26 p<0.001** | DM=+8.07 p<0.001** | DM=+6.41 p<0.001** | P-MRQF wins
+=== TABLE 3 (8 rows x 6 cols) ===
+R0: Pair | MCC@$H$=1 | MCC@$H$=5 | MCC@$H$=10 | Brier@$H$=10 | Pattern
+R1: EUR/USD | 0.261 | 0.254 | 0.225 | 0.210 | reactive
+R2: EUR/GBP | 0.251 | 0.302 | 0.319 | 0.202 | anticipatory
+R3: EUR/JPY | 0.263 | 0.360 | 0.293 | 0.151 | balanced
+R4: EUR/CHF | 0.156 | 0.246 | 0.215 | 0.246 | balanced
+R5: EUR/CAD | 0.316 | 0.415 | 0.464 | 0.135 | anticipatory
+R6: EUR/AUD | 0.259 | 0.376 | 0.294 | 0.184 | balanced
+R7: Mean | 0.251 | 0.325 | 0.302 | 0.188 | —

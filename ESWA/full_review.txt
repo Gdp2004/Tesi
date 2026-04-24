@@ -1,0 +1,212 @@
+[0] P-MRQF-MS: A Predictive Multiscale Framework with Adaptive Fractal Exponent for Regime-Transition Forecasting on the Energy–Entropy Plane — Competitive Evidence over XGBoost, LSTM and Parametric Basel
+[1] Author 1a,∗, Author 2b
+[2] a Affiliation 1, City, Country
+[3] b Affiliation 2, City, Country
+[4] ∗ Corresponding author. E-mail: author@email
+[5] Acknowledgements
+[6] The authors would like to thank the editors and the anonymous reviewers for their constructive comments.
+[7] Declaration of competing interests
+[8] The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+[10] P-MRQF-MS: A Predictive Multiscale Framework with Adaptive Fractal Exponent for Regime-Transition Forecasting on the Energy–Entropy Plane — Competitive Evidence over XGBoost, LSTM and Parametric Basel
+[11] Abstract
+[12] We propose P-MRQF-MS, a predictive machine learning framework for regime-transition forecasting in financial time series. The approach combines three components that act only on the feature representa
+[13] Keywords: regime-transition forecasting; multiscale features; adaptive fractal exponent; XGBoost; interpretability; foreign exchange; decision-support systems
+[14] 1. Introduction
+[15] Regime-transition forecasting in financial time series is a core task for risk management, portfolio allocation and market monitoring. A sudden switch from a quiescent regime to a high-volatility regi
+[16] The present paper proposes P-MRQF-MS, a predictive machine learning framework designed to address this gap. The system combines three engineering choices — an adaptive fractal exponent estimated onlin
+[17] The main contributions of this paper are:
+[18] 1. A predictive framework integrating multiscale MRQF-derived features (energy, entropy, region, adaptive fractal exponent, shared-knowledge-base probabilities, EGARCH conditional variance at three ho
+[19] 2. An adaptive fractal exponent estimator φ̂_local(t) replacing the theoretical golden-mean value φ = 0.618 with a data-driven online estimate from Daubechies D4 wavelet decompositions, empirically va
+[20] 3. A novel regime-transition target on the discretised (E, S) plane that removes the persistence bias of standard volatility-threshold forecasting by construction (MCC_persistence = 0).
+[21] 4. Extensive empirical validation on six real-world FX datasets (EUR/USD, EUR/GBP, EUR/JPY, EUR/CHF, EUR/CAD, EUR/AUD) from the European Central Bank with 7,115 daily observations per pair spanning 19
+[22] 5. A multi-horizon diagnostic revealing a three-regime temporal-heterogeneity classification (reactive, balanced, anticipatory) across the six pairs, interpreted in the two-dimensional complex-time fr
+[23] We execute the full pipeline on real ECB daily data for EUR/USD, EUR/GBP, EUR/JPY, EUR/CHF, EUR/CAD and EUR/AUD from 1999-01-04 to 2026-04-13 (7,115 observations per pair). The temporal split (train 1
+[24] The paper is organised as follows. Section 2 recalls the elements of MRQF used as feature-generation building blocks. Section 3 describes the feature construction and the adaptive fractal exponent. Se
+[25] [Figure placeholder – artwork file supplied separately]
+[26] Figure 1. P-MRQF-MS end-to-end architecture (schematic). Price streams feed the multiscale feature-extraction stage (D1, D5, D22), which computes realised volatility, dispersion, energy–entropy bands 
+[27] 2. Theoretical Elements of MRQF Used as Feature-Generation Building Blocks
+[28] We briefly recall the operational elements of the Multiscale Relativistic Quantum Finance (MRQF) framework (Iovane, Briscione, & Benedetto, 2021; Iovane, Landi, & Serino, 2016; Iovane, 2026a) that are
+[29] 2.1. Scale-Invariance Law and Theoretical Exponent
+[30] MRQF posits a scale-invariance law for the conditional volatility of the price signal:
+[31] σ(N_lots) = ϱ N_lots^φ,   φ_MRQF = (√5 − 1)/2 ≈ 0.618.	(1)
+[32] The golden-mean exponent is derived from a Fibonacci decomposition of trader categories (Iovane, Briscione, & Benedetto, 2021). The Brownian regime corresponds to φ = 0.5. Section 6.1 of the present p
+[33] 2.2. Energy–Entropy Plane
+[34] The market state at time t is projected onto the plane (Eₜ, Sₜ) with Eₜ ∈ {7, …, 32} and Sₜ ∈ {0, …, 12}. Energy reflects directional potential; entropy reflects disorder of the operator distribution 
+[35] [Figure placeholder – artwork file supplied separately]
+[36] Figure 2. The (E, S) plane with nine regions defined by tertiles of the two coordinates.
+[37] 3. Feature Construction
+[38] 3.1. Adaptive Fractal Exponent
+[39] Given a rolling window W of log-returns {r_{t−W+1}, …, r_t}, the local scaling exponent is estimated by wavelet-based OLS on five scales s ∈ {1, 2, 4, 8, 16}:
+[40] φ̂_local(t) = 0.5 + slope_s(log s, log σ_s(t)),   σ_s(t) = std(r_{t−W+1+τ s})_{τ = 0, 1, 2, …}.	(2)
+[41] We compute this estimator at two window sizes: W = 64 (short-memory response) and W = 128 (long-memory stability). Both are included as separate features to let the downstream learner adapt to regime-
+[42] 3.2. Multiscale Volatility and Dispersion
+[43] At horizons w ∈ {1, 5, 22} (daily, weekly, monthly) we compute the rolling standard deviation of log-returns rv_w. At w ∈ {5, 22} we also compute the rolling mean absolute deviation from the median ma
+[44] 3.3. Energy–Entropy Bands at Two Scales
+[45] The primary energy band is computed from the 22-day rolling standard deviation, Eₜ = clip(7 + 25(1 − rv_{22,t}/(2σ_global)), 7, 32). The primary entropy band is Sₜ = clip(9 mad_{22,t}/σ_global, 0, 12)
+[46] 3.4. EGARCH Conditional Variance at Three Horizons
+[47] An EGARCH(1,1) model (Nelson, 1991) is fitted by Gaussian maximum likelihood on a rolling window of 1500 observations and re-fitted every 250 trading days (Dacorogna, Gencay, Muller, Olsen, & Pictet, 
+[48] 3.5. Shared Knowledge Base (SKB)
+[49] The SKB maintains expanding-window counts of band occupancy on the 22-day (E, S) plane with strict no-future-leakage timestamp guards. At time t, the probabilities e₂₂(t) and s₂₂(t) of the current ban
+[50] 3.6. Full Feature Vector
+[51] The 20-dimensional feature vector at time t comprises {rv₁, rv₅, rv₂₂, mad₅, mad₂₂, r̄₁, r̄₅, φ̂_{64}, φ̂_{128}, E₂₂, S₂₂, E₅, S₅, region_{22}, region_5, e₂₂, s₂₂, σ²₁, σ²₅, σ²₂₂}. All features are la
+[52] 4. Architecture and Regime-Transition Target
+[53] 4.1. Predictor
+[54] The architecture inherits the operator taxonomy and cooperation primitive of (Iovane, 2026a) but uses a single gradient-boosted classifier (Chen & Guestrin, 2016) as the final predictor, operating on 
+[55] On the nature of the contribution. A reader may object that the learning algorithm is a standard XGBoost and that the gain is therefore attributable to feature engineering rather than to a fundamental
+[56] 4.2. Regime-Transition Target
+[57] The central methodological contribution of this paper on the target side is the regime-transition target at horizon H:
+[58] yₜ = 1[region(E_{t+H}, S_{t+H}) ≠ region(Eₜ, Sₜ)],   H = 5 trading days.	(3)
+[59] Three properties make this target superior to volatility forecasting as a stress test: (i) Persistence is provably the worst strategy — a classifier that always predicts yₜ = 0 achieves MCC = 0 by con
+[60] On the economic meaning of the target. One might object that the regime-transition target is “constructed” rather than a directly observed market quantity such as the log-return or realised volatility
+[61] 5. Experimental Protocol
+[62] 5.1. Data
+[63] Daily ECB reference rates retrieved via CurrencyConverter 0.18.17 (pinned) for EUR/USD, EUR/GBP, EUR/JPY, EUR/CHF, EUR/CAD and EUR/AUD, spanning 4 January 1999 to 13 April 2026, 7,115 business-day obs
+[64] 5.2. Temporal Split and Threshold Optimisation
+[65] Three contiguous segments per pair: training 1999-01-04 to 2007-12-31 (2,236 observations after the 500-day warm-up), validation 2008-01-01 to 2012-12-31 (1,254 observations), test 2013-01-01 to 2026-
+[66] We conducted a supplementary rolling-origin sensitivity analysis on EUR/USD with three 12-month test windows (origins 2015-01-01, 2020-01-01, 2022-01-01) and two-year validation windows preceding each
+[67] 5.3. Baseline Methods
+[68] Four baselines are evaluated: (a) Persistence, always predicting yₜ = 0. (b) XGBoost classical, using only {rv₁, rv₅, rv₂₂, σ²₁, σ²₅, σ²₂₂} as features with the same hyperparameters as P-MRQF-MS. (c) 
+[69] 5.4. LSTM Hyperparameter Grid and Per-Pair Tuning
+[70] To ensure that the LSTM baseline is not a straw man, we evaluated six hyperparameter configurations on the three pairs where the default LSTM was most competitive (EUR/USD, EUR/JPY, EUR/CAD): {(h, l, 
+[71] 5.5. P-MRQF-MS Hyperparameters
+[72] Five-seed XGBoost ensemble on the full 20-dimensional vector; hyperparameters selected on validation: n_estimators = 200, max_depth = 4, learning_rate = 0.1, subsample = 0.7, colsample_bytree = 0.9, L
+[73] 5.6. Statistical Tests
+[74] Per-pair bootstrap 95 % confidence intervals on MCC use the stationary block bootstrap of Politis and Romano (Politis & Romano, 1994) with B = 1000 resamples and block length ⌊n_test^{1/3}⌋. Per-pair 
+[75] 6. Empirical Results
+[76] 6.1. Adaptive Fractal Exponent: Empirical Falsification of the Golden Mean
+[77] Figure 3 reports the empirical distribution of φ̂_{128}(t) across all six pairs. Medians cluster tightly in [0.443, 0.454]; inter-quartile ranges all fall below 0.530; the fraction of windows exceedin
+[78] [Figure placeholder – artwork file supplied separately]
+[79] Figure 3. Empirical distribution of the adaptive fractal exponent φ̂_{128}(t) across six pairs (violin plots, 1999–2026). The golden-mean value φ = 0.618 (red dashed) is exceeded by at most 5.8 % of w
+[80] 6.2. Regime-Transition Forecasting: Per-Pair Performance
+[81] Table 1 reports per-pair MCC on the held-out test set. LSTM figures are from the per-pair tuned configuration (Section 5.4) where applicable; untuned configuration elsewhere. P-MRQF-MS achieves the be
+[82] Table 1. Per-pair Matthews correlation coefficient on the held-out test set (2013–2026) for the regime-transition target (H = 5 days). Bootstrap 95 % CIs from stationary block bootstrap, B = 1000.
+[83] [Figure placeholder – artwork file supplied separately]
+[84] Figure 4. Per-pair MCC with bootstrap 95 % CIs. The LSTM bar shown here uses the original untuned configuration for visual comparability across all six pairs; after per-pair hyperparameter tuning on U
+[85] 6.3. Cross-Pair Wilcoxon Signed-Rank Tests
+[86] Table 2 reports the cross-pair Wilcoxon signed-rank tests on the six paired differences between P-MRQF-MS and each baseline. P-MRQF-MS wins in 6 of 6 pairs against every baseline including the tuned L
+[87] The interaction between cross-pair Wilcoxon (underpowered at n = 6) and the per-pair Diebold–Mariano tests (reported next, based on thousands of squared-error observations per pair) deserves comment. 
+[88] Table 2. Cross-pair Wilcoxon signed-rank tests across the six pairs. Uncorrected p-values reported; Holm correction multiplies each by 4.
+[89] 6.4. Friedman–Nemenyi Multi-Method Test
+[90] To complement the paired Wilcoxon comparisons, which are individually-baseline-specific and may lack power at N = 6, we apply the non-parametric Friedman test (Friedman, 1937) jointly across the four 
+[91] The Nemenyi post-hoc test (Nemenyi, 1963) at α = 0.05 with k = 4 methods and N = 6 datasets gives a critical difference of CD = 1.915 average ranks. Average ranks across the six pairs (lower is better
+[92] [Figure placeholder – artwork file supplied separately]
+[93] Figure 5. Pairwise per-pair MCC scatter (P-MRQF-MS vs each baseline). Points above the diagonal indicate P-MRQF-MS wins. This figure uses the untuned LSTM MCCs for consistency with the raw Step C eval
+[94] 6.5. Diebold–Mariano Tests on Probability Loss
+[95] Table 3 reports per-pair DM tests on the squared-error loss of the probability forecasts, with Holm–Bonferroni correction at α = 0.05 family-wise across the four comparisons per pair. Sign convention:
+[96] Table 3. Per-pair Diebold–Mariano test on squared-error probability loss, Holm–Bonferroni-corrected p-values (family-wise α = 0.05 across 4 baselines per pair). Positive DM = baseline loss higher = P-
+[97] 6.6. (E, S) Trajectories During the COVID-19 Shock
+[98] As a qualitative sanity check, Figure 6 shows the empirical trajectories of the market state on the (E, S) plane for all six pairs during the 2020-01-01 to 2020-05-30 window, which contains the COVID-
+[99] [Figure placeholder – artwork file supplied separately]
+[100] Figure 6. Real (E, S)-plane trajectories during the COVID-19 shock (2020-01-01 to 2020-05-30) across six FX pairs. Each trajectory is colour-coded from blue (start) to red (end); every pair exhibits t
+[101] 6.7. Temporal Heterogeneity Across Forecast Horizons
+[102] The predictive task in the main evaluation is the binary regime-transition at horizon H = 5 trading days. To probe whether the framework's predictive structure is uniform across horizons, we evaluate 
+[103] Table 4 and Figure 7 report the results. Three observations emerge. First, the cross-pair mean MCC is 0.251 at H = 1, 0.325 at H = 5 and 0.302 at H = 10. On aggregate, the H = 5 setting of the main pa
+[104] Second, and more importantly, the per-pair MCC trajectories across the three horizons are not uniform. Three qualitative patterns emerge from the six pairs: (a) a reactive pattern in which MCC decreas
+[105] Third, these qualitative patterns can be interpreted within the two-dimensional complex-time perspective introduced by Iovane and Iovane (Iovane & Iovane, 2026) in the context of sophimatics and hallu
+[106] This three-regime classification is qualitative and sample-dependent — with six pairs and three horizons we make no formal claim about the statistical reliability of the pattern, and we note that a di
+[107] Table 4. Per-pair and cross-pair mean MCC at three forecast horizons. Same 20-feature P-MRQF-MS pipeline as in the main evaluation; only the target horizon H is varied. Pattern column: reactive = mono
+[108] [Figure placeholder – artwork file supplied separately]
+[109] Figure 7. Left: per-pair MCC trajectories across horizons H ∈ {1, 5, 10}. Colour codes the temporal-structure classification: red = reactive (MCC decreasing with H), blue = balanced (MCC peak at H = 5
+[110] 7. Ablation and Negative Stacking Result
+[111] 7.1. Feature-Group Ablation
+[112] Figure 8 reports the leave-one-group-out ablation with per-pair paired bootstrap ΔMCC and cross-pair Wilcoxon summaries. Five feature groups are ablated independently: MRQF bands (E, S, region at both
+[113] The group-level effects are small in point estimate (all |Δ̄| < 0.005 in cross-pair mean) and none reach statistical significance under the cross-pair Wilcoxon with Holm correction. The MRQF bands gro
+[114] This is an honest negative result: on this sample size and task, we cannot isolate the contribution of any single feature group with statistical significance. However, we do observe a cross-pair-signi
+[115] [Figure placeholder – artwork file supplied separately]
+[116] Figure 8. Leave-one-group-out ablation across 6 pairs. Colour: ΔMCC when the group is removed; blue = positive (removal helps, feature redundant), red = negative (removal hurts, feature useful). Annot
+[117] 7.2. Stacking P-MRQF-MS + LSTM: Negative Result
+[118] For completeness, we attempted a stacking meta-learner combining the out-of-fold probabilities of P-MRQF-MS and the LSTM ensemble with a subset of MRQF features, trained with XGBoost as the meta-learn
+[119] 7.3. Feature Redundancy and Effective Dimensionality
+[120] One might argue that a twenty-dimensional feature vector with known correlations (e.g., between E and rv, or between S and mad) is over-specified and that the predictive value could derive from redund
+[121] The strongest correlations are ρ(S₂₂, mad_{22}) = +0.999, ρ(rv_{22}, E₂₂) = −0.996, ρ(S₅, mad₅) = +0.987 and ρ(rv₅, E₅) = −0.983; these are by construction (the energy and entropy bands are determinis
+[122] 7.4. Quantitative Interpretability via SHAP Stability
+[123] To quantify interpretability beyond narrative claims, we compute feature-attribution stability under re-seeding. Five XGBoost ensembles with identical hyperparameters but different random seeds (2026,
+[124] 8. Discussion
+[125] 8.1. Scope and Limitations
+[126] The claim of the present paper is precise. On the regime-transition task at H = 5 trading days, on six major EUR-quoted FX pairs at daily resolution, on the 2013–2026 test window, P-MRQF-MS achieves c
+[127] Three explicit limitations. First, the evaluation is at daily resolution; intraday evaluation on M1/M5/M15 tick data would provide a stronger test but was not accessible in our computational environme
+[128] On the interpretation of the statistical evidence. The cross-pair Wilcoxon signed-rank test on N = 6 samples has its uncorrected p-value lower bound at 0.031, which we reach on all four baselines; the
+[129] 8.2. Why LSTM Underperforms P-MRQF-MS Even After Tuning
+[130] The LSTM hyperparameter grid was designed to be comparable in effort to the XGBoost search: six configurations, each fitted on training and scored on validation, the best selected for the 5-seed ensem
+[131] 8.3. The Adaptive Fractal Exponent as an Empirical Finding
+[132] The replication across six pairs of an adaptive fractal exponent median in [0.443, 0.454], with less than 6 % of windows exceeding the golden-mean value, deserves consideration independently of the pr
+[133] 8.4. Regulatory and Related Work
+[134] The architecture satisfies the record-keeping requirement of Article 12 of the EU AI Act (European Parliament & Council, 2024) through the SKB's append-only timestamp-guarded update protocol, the logg
+[135] 8.5. Temporal Heterogeneity and the Complex-Time Interpretation
+[136] Section 6.7 reports a finding that is scientifically interesting but does not translate into a cross-pair performance improvement: the per-pair MCC trajectories across horizons H ∈ {1, 5, 10} partitio
+[137] 8.6. Practical Applications in Decision-Support Systems
+[138] From an application perspective, the proposed framework can be integrated into decision-support systems for risk management and market monitoring, where regime-awareness is critical. Three deployment 
+[139] 9. Conclusions and Future Work
+[140] We presented P-MRQF-MS, a predictive multiscale framework with adaptive fractal exponent for regime-transition forecasting on the energy–entropy plane. The three contributions — adaptive fractal expon
+[141] Five directions remain open. First, intraday evaluation on tick-level FX data, where faster regime dynamics should amplify the advantage of multiscale features. Second, cross-asset extension to equity
+[142] The contribution of the present paper should therefore be interpreted as a representation-level advancement that enhances the learnability of regime-transition dynamics rather than as a new learning p
+[143] More broadly, the proposed system demonstrates that combining structured feature engineering with machine learning can effectively address complex prediction tasks in financial systems, and that such 
+[144] CRediT authorship contribution statement
+[145] Author 1: Conceptualization, Methodology, Software, Formal analysis, Investigation, Data curation, Writing – original draft, Writing – review and editing, Visualization. Author 2: Supervision, Validat
+[146] Declaration of competing interests
+[147] The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+[148] Funding
+[149] This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+[150] Data availability
+[151] Daily ECB reference rates used in this study are publicly available through the European Central Bank Statistical Data Warehouse and were retrieved via CurrencyConverter 0.18.17 (pinned). Complete cod
+[152] Declaration of generative AI and AI-assisted technologies in the manuscript preparation process
+[153] During the preparation of this work the authors did not use any generative AI or AI-assisted technology. The authors reviewed and edited the content as needed and take full responsibility for the cont
+[154] References
+[155] Bachelier, L. (1900). Theorie de la speculation. Annales Scientifiques de l'Ecole Normale Superieure, 17, 21–86.
+[156] Bessembinder, H., & Seguin, P. J. (1993). Price volatility, trading volume, and market depth: Evidence from futures markets. The Journal of Financial and Quantitative Analysis, 28(1), 21–39.
+[157] Blackledge, J. M., & Murphy, K. (2011). Currency trading using the fractal market hypothesis. In Risk management trends. IntechOpen.
+[158] Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. Journal of Econometrics, 31(3), 307–327.
+[159] Bouchaud, J.-P., & Potters, M. (2003). Theory of financial risk and derivative pricing (2nd ed.). Cambridge University Press.
+[160] Brownlees, C. T., & Gallo, G. M. (2006). Financial econometric analysis at ultra-high frequency: Data handling concerns. Computational Statistics & Data Analysis, 51(4), 2232–2245.
+[161] Calvet, L. E., & Fisher, A. J. (2008). Multifractal volatility: Theory, forecasting, and pricing. Academic Press.
+[162] Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (pp. 785–794). ACM.
+[163] Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. Quantitative Finance, 1(2), 223–236.
+[164] Corsi, F. (2009). A simple approximate long-memory model of realized volatility. Journal of Financial Econometrics, 7(2), 174–196.
+[165] Cover, T. M., & Thomas, J. A. (2006). Elements of information theory (2nd ed.). Wiley.
+[166] Dacorogna, M. M., Gencay, R., Muller, U., Olsen, R. B., & Pictet, O. V. (2001). An introduction to high-frequency finance. Academic Press.
+[167] Daubechies, I. (1992). Ten lectures on wavelets. Society for Industrial and Applied Mathematics.
+[168] Deng, Y., Bao, F., Kong, Y., Ren, Z., & Dai, Q. (2017). Deep direct reinforcement learning for financial signal representation and trading. IEEE Transactions on Neural Networks and Learning Systems, 2
+[169] Di Matteo, T. (2007). Multi-scaling in finance. Quantitative Finance, 7(1), 21–36.
+[170] Diebold, F. X., & Mariano, R. S. (1995). Comparing predictive accuracy. Journal of Business & Economic Statistics, 13(3), 253–263.
+[171] Embrechts, P., & Maejima, M. (2002). Selfsimilar processes. Princeton University Press.
+[172] Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. Econometrica, 50(4), 987–1007.
+[173] European Parliament and Council. (2024). Regulation (EU) 2024/1689 of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act). Official Journal of the Europe
+[174] Friedman, M. (1937). The use of ranks to avoid the assumption of normality implicit in the analysis of variance. Journal of the American Statistical Association, 32(200), 675–701.
+[175] Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735–1780.
+[176] Hosseini Rad, S., & Tahmasebi Khorasani, S. (2024). Cooperative multi-agent deep reinforcement learning for Forex trading. In Proceedings of the IEEE AISP. IEEE.
+[177] Iovane, G., Laserra, E., & Tortoriello, F. S. (2004). Stochastic self-similar and fractal universe. Chaos, Solitons & Fractals, 20(3), 415–426.
+[178] Iovane, G., Landi, A., & Serino, S. (2016). An optimized mathematical-physical approach to financial market. Journal of Information & Optimization Sciences, 37(3), 423–448.
+[179] Iovane, G., Amorosia, F. S., Benedetto, E., & Lamponi, G. (2020). Decision and reasoning in incompleteness or uncertainty conditions. IEEE Access, 8, 115109–115122.
+[180] Iovane, G., Briscione, A., & Benedetto, E. (2021). Financion: A quantum approach to financial market modelling. Journal of Statistics & Management Systems, 24(5), 1127–1149.
+[181] Iovane, G. (2024a). Decision support system driven by thermo-complexity: Algorithms. IEEE Access, 12, 157359–157382.
+[182] Iovane, G., & Chinnici, M. (2024). DSS driven by thermo-complexity: Scenario analysis. Applied Sciences, 14(6), 2387.
+[183] Iovane, G. (2026a). MRQF-MAS: A multiscale relativistic quantum finance framework for cooperative multi-agent trading systems with shared knowledge base [Unpublished manuscript, available on request].
+[184] Iovane, G. (2026b). P-MRQF-MAS: An interpretable cooperative multi-agent framework for high-volatility regime forecasting on the energy–entropy plane [Unpublished manuscript, available on request].
+[185] Iovane, G., & Iovane, G. (2026). Sophimatics and 2D complex time to mitigate hallucinations in LLMs for novel intelligent information systems in digital transformation. Applied Sciences, 16(1), Articl
+[186] Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review, 106(4), 620–630.
+[187] Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. Econometrica, 47(2), 263–292.
+[188] Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159–174.
+[189] Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: A survey. Philosophical Transactions of the Royal Society A, 379(2194), Article 20200209.
+[190] Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems (Vol. 30, pp. 4765–4774).
+[191] Mallat, S. (2008). A wavelet tour of signal processing (3rd ed.). Academic Press.
+[192] Mandelbrot, B. B. (1963). The variation of certain speculative prices. The Journal of Business, 36(4), 394–419.
+[193] Mandelbrot, B. B. (1997). Fractals and scaling in finance. Springer.
+[194] Mantegna, R. N., & Stanley, H. E. (2000). An introduction to econophysics: Correlations and complexity in finance. Cambridge University Press.
+[195] Moody, J., & Saffell, M. (2001). Learning to trade via direct reinforcement. IEEE Transactions on Neural Networks, 12(4), 875–889.
+[196] Morales, R., Di Matteo, T., & Aste, T. (2013). Non-stationary multifractality in stock returns. Physica A: Statistical Mechanics and Its Applications, 392(24), 6470–6483.
+[197] Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. Econometrica, 59(2), 347–370.
+[198] Nemenyi, P. B. (1963). Distribution-free multiple comparisons [Doctoral dissertation, Princeton University]. See also Demšar, J. (2006). Statistical comparisons of classifiers over multiple data sets.
+[199] Peters, E. E. (1994). Fractal market analysis: Applying chaos theory to investment and economics. Wiley.
+[200] Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428), 1303–1313.
+[201] Poon, S.-H., & Granger, C. W. J. (2003). Forecasting volatility in financial markets: A review. Journal of Economic Literature, 41(2), 478–539.
+[202] Schwert, G. W. (1989). Why does stock market volatility change over time? The Journal of Finance, 44(5), 1115–1153.
+[203] Shavandi, A., & Khedmati, M. (2022). A multi-agent deep reinforcement learning framework for algorithmic trading in financial markets. Expert Systems with Applications, 208, 118124.
+[204] Van der Laan, M. J., Polley, E. C., & Hubbard, A. E. (2007). Super learner. Statistical Applications in Genetics and Molecular Biology, 6(1), Article 25.
+[205] Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all you need. In Advances in Neural Information Processing Systems (Vol.
+[206] Wolpert, D. H. (1992). Stacked generalization. Neural Networks, 5(2), 241–259.
+[207] Wooldridge, M. (2009). An introduction to multiagent systems (2nd ed.). Wiley.
+[208] Appendix A. Reproducibility
+[209] A.1. Software Stack
+[210] Python 3.12; NumPy 2.4; SciPy 1.13; PyWavelets 1.9; scikit-learn 1.5; XGBoost 3.2; arch 8.0; pandas 2.3; PyTorch 2.11 (CPU-only); CurrencyConverter 0.18.17 (pinned). Wavelet decomposition: Daubechies 
+[211] A.2. Stacking Negative Result Details
+[212] On EUR/USD, the stacking meta-learner was trained with the following inputs: out-of-fold LSTM probabilities (2-fold CV on training), out-of-fold P-MRQF-MS probabilities (2-fold CV on training) and a s

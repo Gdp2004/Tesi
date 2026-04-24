@@ -1,0 +1,50 @@
+[163] | Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. Quantitative Finance, 1(2), 223–236.
+[164] | Corsi, F. (2009). A simple approximate long-memory model of realized volatility. Journal of Financial Econometrics, 7(2), 174–196.
+[165] | Cover, T. M., & Thomas, J. A. (2006). Elements of information theory (2nd ed.). Wiley.
+[166] | Dacorogna, M. M., Gencay, R., Muller, U., Olsen, R. B., & Pictet, O. V. (2001). An introduction to high-frequency finance. Academic Press.
+[167] | Daubechies, I. (1992). Ten lectures on wavelets. Society for Industrial and Applied Mathematics.
+[168] | Deng, Y., Bao, F., Kong, Y., Ren, Z., & Dai, Q. (2017). Deep direct reinforcement learning for financial signal representation and trading. IEEE Transactions on Neural Networks and
+[169] | Di Matteo, T. (2007). Multi-scaling in finance. Quantitative Finance, 7(1), 21–36.
+[170] | Diebold, F. X., & Mariano, R. S. (1995). Comparing predictive accuracy. Journal of Business & Economic Statistics, 13(3), 253–263.
+[171] | Embrechts, P., & Maejima, M. (2002). Selfsimilar processes. Princeton University Press.
+[172] | Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. Econometrica, 50(4), 987–1007.
+[173] | European Parliament and Council. (2024). Regulation (EU) 2024/1689 of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act). Official J
+[174] | Friedman, M. (1937). The use of ranks to avoid the assumption of normality implicit in the analysis of variance. Journal of the American Statistical Association, 32(200), 675–701.
+[175] | Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735–1780.
+[176] | Hosseini Rad, S., & Tahmasebi Khorasani, S. (2024). Cooperative multi-agent deep reinforcement learning for Forex trading. In Proceedings of the IEEE AISP. IEEE.
+[177] | Iovane, G., Laserra, E., & Tortoriello, F. S. (2004). Stochastic self-similar and fractal universe. Chaos, Solitons & Fractals, 20(3), 415–426.
+[178] | Iovane, G., Landi, A., & Serino, S. (2016). An optimized mathematical-physical approach to financial market. Journal of Information & Optimization Sciences, 37(3), 423–448.
+[179] | Iovane, G., Amorosia, F. S., Benedetto, E., & Lamponi, G. (2020). Decision and reasoning in incompleteness or uncertainty conditions. IEEE Access, 8, 115109–115122.
+[180] | Iovane, G., Briscione, A., & Benedetto, E. (2021). Financion: A quantum approach to financial market modelling. Journal of Statistics & Management Systems, 24(5), 1127–1149.
+[181] | Iovane, G. (2024a). Decision support system driven by thermo-complexity: Algorithms. IEEE Access, 12, 157359–157382.
+[182] | Iovane, G., & Chinnici, M. (2024). DSS driven by thermo-complexity: Scenario analysis. Applied Sciences, 14(6), 2387.
+[183] | Iovane, G. (2026a). MRQF-MAS: A multiscale relativistic quantum finance framework for cooperative multi-agent trading systems with shared knowledge base [Unpublished manuscript, av
+[184] | Iovane, G. (2026b). P-MRQF-MAS: An interpretable cooperative multi-agent framework for high-volatility regime forecasting on the energy–entropy plane [Unpublished manuscript, avail
+[185] | Iovane, G., & Iovane, G. (2026). Sophimatics and 2D complex time to mitigate hallucinations in LLMs for novel intelligent information systems in digital transformation. Applied Sci
+[186] | Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review, 106(4), 620–630.
+[187] | Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. Econometrica, 47(2), 263–292.
+[188] | Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159–174.
+[189] | Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: A survey. Philosophical Transactions of the Royal Society A, 379(2194), Article 20200209.
+[190] | Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems (Vol. 30, pp. 4765–4774).
+[191] | Mallat, S. (2008). A wavelet tour of signal processing (3rd ed.). Academic Press.
+[192] | Mandelbrot, B. B. (1963). The variation of certain speculative prices. The Journal of Business, 36(4), 394–419.
+[193] | Mandelbrot, B. B. (1997). Fractals and scaling in finance. Springer.
+[194] | Mantegna, R. N., & Stanley, H. E. (2000). An introduction to econophysics: Correlations and complexity in finance. Cambridge University Press.
+[195] | Moody, J., & Saffell, M. (2001). Learning to trade via direct reinforcement. IEEE Transactions on Neural Networks, 12(4), 875–889.
+[196] | Morales, R., Di Matteo, T., & Aste, T. (2013). Non-stationary multifractality in stock returns. Physica A: Statistical Mechanics and Its Applications, 392(24), 6470–6483.
+[197] | Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. Econometrica, 59(2), 347–370.
+[198] | Nemenyi, P. B. (1963). Distribution-free multiple comparisons [Doctoral dissertation, Princeton University]. See also Demšar, J. (2006). Statistical comparisons of classifiers over
+[199] | Peters, E. E. (1994). Fractal market analysis: Applying chaos theory to investment and economics. Wiley.
+[200] | Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428), 1303–1313.
+[201] | Poon, S.-H., & Granger, C. W. J. (2003). Forecasting volatility in financial markets: A review. Journal of Economic Literature, 41(2), 478–539.
+[202] | Schwert, G. W. (1989). Why does stock market volatility change over time? The Journal of Finance, 44(5), 1115–1153.
+[203] | Shavandi, A., & Khedmati, M. (2022). A multi-agent deep reinforcement learning framework for algorithmic trading in financial markets. Expert Systems with Applications, 208, 118124
+[204] | Van der Laan, M. J., Polley, E. C., & Hubbard, A. E. (2007). Super learner. Statistical Applications in Genetics and Molecular Biology, 6(1), Article 25.
+[205] | Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all you need. In Advances in Neural Information Proc
+[206] | Wolpert, D. H. (1992). Stacked generalization. Neural Networks, 5(2), 241–259.
+[207] | Wooldridge, M. (2009). An introduction to multiagent systems (2nd ed.). Wiley.
+[208] | Appendix A. Reproducibility
+[209] | A.1. Software Stack
+[210] | Python 3.12; NumPy 2.4; SciPy 1.13; PyWavelets 1.9; scikit-learn 1.5; XGBoost 3.2; arch 8.0; pandas 2.3; PyTorch 2.11 (CPU-only); CurrencyConverter 0.18.17 (pinned). Wavelet decomp
+[211] | A.2. Stacking Negative Result Details
+[212] | On EUR/USD, the stacking meta-learner was trained with the following inputs: out-of-fold LSTM probabilities (2-fold CV on training), out-of-fold P-MRQF-MS probabilities (2-fold CV 
